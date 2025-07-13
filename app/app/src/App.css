@@ -1,0 +1,35 @@
+#root {
+  margin: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 2rem;
+}
+
+
+#header {
+  margin-bottom: 6rem;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+
+#header h1 {
+  margin-bottom: 1.5rem;
+}
+
+#cform {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+#cform input {
+  margin-bottom: 1rem;
+}
