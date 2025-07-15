@@ -1,9 +1,10 @@
-package handlers
+package ws
 
 import (
 	"crypto/rand"
-	"github.com/mejxe/cindy-k8/internal/models"
 	"math/big"
+
+	"github.com/mejxe/cindy-k8/internal/models"
 )
 
 func getIdentity(token string) *models.Player {

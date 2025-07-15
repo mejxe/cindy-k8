@@ -1,4 +1,4 @@
-package handlers
+package ws
 
 import (
 	"encoding/json"
@@ -13,6 +13,7 @@ var room = &models.GlobalRoom
 var players = &models.GlobalPlayers
 
 func HandleSending() {
+	// Send to everyone messages flowing through OutChannel
 	for msgToSend := range room.OutChannel {
 		jsonMsg, _ := json.Marshal(msgToSend)
 		for _, p := range players.Players {
@@ -21,43 +22,26 @@ func HandleSending() {
 	}
 }
 
-func HandlePlayerActions() {
-	/* possible player actions:
-
-	- find body
-	- pass mic
-	- vote
-	- eliminate player (if mafia)
-
-	*/
-	for msg := range room.UpdateChannel {
-		println(msg.String())
-	}
-}
-func HandleGmActions() {
-	/* possible gm actions:
-
-	- start/end game
-	- give/take mic
-	- kick
-	- kill
-
-	*/
-	for msg := range room.GmChannel {
-		println(msg)
-		// TODO: add switch for gm actions
-	}
-}
 func HandleGmConnection(w *websocket.Conn) {
+	// Handle join, auth, and then Unmarshal and send messages to GMInChannel for handling
 	println("Game master joined the lobby.")
 	room.GameMaster.Connected = true
 	room.GameMaster.Connection = w
 	buf := make([]byte, 1024)
 	for {
-		_, err := w.Read(buf)
+		n, err := w.Read(buf)
+
 		if err != nil {
 			break
 		}
+
+		var gmMsg models.GMMessage
+
+		if json.Unmarshal(buf[:n], gmMsg) != nil {
+			continue
+		}
+		models.GlobalRoom.GMInChannel <- gmMsg
+
 	}
 	room.GameMaster.Connected = false
 	room.GameMaster.Connection = nil
@@ -65,16 +49,17 @@ func HandleGmConnection(w *websocket.Conn) {
 
 }
 func sendRoomData(ws *websocket.Conn) {
-	// data to send: all players (names and occupations), gameStared?, gamemaster
+	// Send GameState to single user
 	roomData := map[string]any{
 		"players":   players.Map(),
 		"gameState": room.GameState.Map(),
 	}
 
 	json.NewEncoder(ws).Encode(roomData)
-
 }
+
 func HandleRoom(ws *websocket.Conn) {
+	// Handle users joining the room
 	if !ws.Request().URL.Query().Has("token") {
 		ws.Write([]byte("Token not provided."))
 		return
@@ -93,23 +78,32 @@ func HandleRoom(ws *websocket.Conn) {
 	identity.Connection = ws
 
 	// send identity data and room data to display characters
-	ws.Write([]byte(identity.String()))
+	ws.Write([]byte(fmt.Sprintf("You are: %s", identity.String())))
 	sendRoomData(ws)
 
 	buf := make([]byte, 1024)
 	for {
-		// TODO: Add handling for room flow
+		// read, deserialize, and pass for further handling
 		n, err := ws.Read(buf)
-		msg := buf[:n]
-		fmt.Printf("Read message: %s\n", string(msg))
-		identity.SendToServer(msg)
 		if err != nil {
 			break
 		}
+		msg := buf[:n]
+		fmt.Printf("Read message: %s\n", string(msg))
+
+		var clientMsg models.ClientMessage
+
+		if json.Unmarshal(msg, clientMsg) != nil {
+			fmt.Printf("Error: Can't parse message %s\n", string(msg))
+			continue
+		}
+
+		models.GlobalRoom.ClientInChannel <- clientMsg
 
 	}
 }
-func HandleJoin(w http.ResponseWriter, r *http.Request) {
+func HandleCreate(w http.ResponseWriter, r *http.Request) {
+	// endpoint for handling creation of characters
 	fmt.Printf("Server got a hit: %s", r.URL.Path)
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", 403)
@@ -128,8 +122,9 @@ func HandleJoin(w http.ResponseWriter, r *http.Request) {
 		Token:      generateToken(),
 	}
 	players.Players[player.Id] = player
-	json.NewEncoder(w).Encode(map[string]string{
+	msg := map[string]any{
 		"status": "ok",
 		"token":  player.Token,
-	})
+	}
+	json.NewEncoder(w).Encode(models.NewServerMessage(models.ServerMessageToken, msg))
 }
