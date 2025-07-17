@@ -40,13 +40,13 @@ func (ps *Players) Map() map[string]map[string]string {
 
 func (gs *GameState) Map() map[string]string {
 	tmap := map[string]string{
-		"round":           strconv.Itoa(gs.round),
-		"night":           strconv.FormatBool(gs.night),
-		"started":         strconv.FormatBool(gs.started),
-		"numPlayersAlive": strconv.Itoa(gs.numPlayersAlive),
+		"round":           strconv.Itoa(gs.Round),
+		"night":           strconv.FormatBool(gs.Night),
+		"started":         strconv.FormatBool(gs.Started),
+		"numPlayersAlive": strconv.Itoa(gs.NumPlayersAlive),
 	}
 	return tmap
 }
 func (cs *ClientMessage) String() string {
-	return fmt.Sprintf("author: %s\nbody: %s", cs.author, cs.body)
+	return fmt.Sprintf("author: %s\nbody: %s", cs.Author, cs.Body)
 }

@@ -12,22 +12,27 @@ const (
 
 // GM MessageTypes
 const (
-	GMMessageTypeStart MessageType = "start"
-	GMMessageTypePause MessageType = "pause"
-	GMMessageTypeKick  MessageType = "kick"
-	GMMessageTypeKill  MessageType = "kill"
-	GMMessageTypeAuth  MessageType = "auth"
+	GMMessageTypeStart     MessageType = "start"
+	GMMessageTypePause     MessageType = "pause"
+	GMMessageTypeEnd       MessageType = "end"
+	GMMessageTypeKick      MessageType = "kick"
+	GMMessageTypeKill      MessageType = "kill"
+	GMMessageTypeAuth      MessageType = "auth"
+	GMMessageSummarizeVote MessageType = "summarize"
 )
 
 // Server Message Types
 const (
-	ServerMessageStart     MessageType = "started"
-	ServerMessageEnd       MessageType = "ended"
-	ServerMessagePKilled   MessageType = "pkilled"
-	ServerMessageMicPassed MessageType = "micPassed"
-	ServerMessageToken     MessageType = "token"
-	ServerMessageFoundBody MessageType = "body"
-	Error                  MessageType = "error"
+	ServerMessageStart        MessageType = "started"
+	ServerMessageEnd          MessageType = "ended"
+	ServerMessagePKilled      MessageType = "pkilled"
+	ServerMessageMicPassed    MessageType = "micPassed"
+	ServerMessageToken        MessageType = "token"
+	ServerMessageFoundBody    MessageType = "body"
+	ServerMessageVoteReceived MessageType = "voted"
+	ServerMessageAwaitVote    MessageType = "waitingForVote"
+	ServerMessageVoteSummary  MessageType = "voteSummary"
+	Error                     MessageType = "error"
 )
 
 type ClientMessage struct {

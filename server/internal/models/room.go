@@ -15,15 +15,17 @@ type GameState struct {
 	Night           bool // is it night?
 	Started         bool
 	HoldingMic      *Player
+	RoundsBody      *DeadBody
+	CurrentVote     *Vote
 }
 
 // room implementation block
-func (r *Room) startGame() {
+func (r *Room) StartGame() {
 	r.GameState.Started = true
 	r.GameState.Round = 0
-	r.GameState.NumPlayersAlive = len(GlobalPlayers.Players)
+	r.GameState.NumPlayersAlive = len(GlobalRoom.Players.Players)
 }
-func (r *Room) finishGame(syndicateWins bool) {
+func (r *Room) FinishGame(syndicateWins bool) {
 	r.GameState.Started = false
 	r.OutChannel <- ServerMessage{}
 
@@ -31,7 +33,8 @@ func (r *Room) finishGame(syndicateWins bool) {
 
 // end
 // glob variables export
-var GlobalRoom Room = Room{Players: &GlobalPlayers,
+var GlobalRoom *Room = &Room{
+	Players:         &Players{Players: make(map[int]*Player)},
 	GameState:       &GameState{},
 	ClientInChannel: make(chan ClientMessage),
 	GMInChannel:     make(chan GMMessage),

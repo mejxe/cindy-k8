@@ -24,7 +24,7 @@ type Player struct {
 
 type Players struct {
 	sync.Mutex
-	Players map[int]Player
+	Players map[int]*Player
 }
 type DeadBody struct {
 	Of       *Player
@@ -32,4 +32,3 @@ type DeadBody struct {
 }
 
 // Globs
-var GlobalPlayers Players = Players{Players: make(map[int]Player)}

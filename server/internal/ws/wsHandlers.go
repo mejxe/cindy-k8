@@ -9,8 +9,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var room = &models.GlobalRoom
-var players = &models.GlobalPlayers
+var room = models.GlobalRoom
+var players = models.GlobalRoom.Players
 
 func HandleSending() {
 	// Send to everyone messages flowing through OutChannel
@@ -47,15 +47,6 @@ func HandleGmConnection(w *websocket.Conn) {
 	room.GameMaster.Connection = nil
 	println("Game master disconnected.")
 
-}
-func sendRoomData(ws *websocket.Conn) {
-	// Send GameState to single user
-	roomData := map[string]any{
-		"players":   players.Map(),
-		"gameState": room.GameState.Map(),
-	}
-
-	json.NewEncoder(ws).Encode(roomData)
 }
 
 func HandleRoom(ws *websocket.Conn) {
@@ -111,7 +102,7 @@ func HandleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	var player models.Player = models.Player{
+	var player *models.Player = &models.Player{
 		Id:         len(players.Players),
 		FirstName:  r.Form.Get("firstName"),
 		LastName:   r.Form.Get("lastName"),

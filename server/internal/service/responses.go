@@ -24,6 +24,13 @@ func FoundBody(player *models.Player, body *models.DeadBody) {
 	}
 	json.NewEncoder(player.Connection).Encode(models.NewServerMessage(models.ServerMessageFoundBody, message))
 }
+func ReportedBody(player *models.Player, body *models.DeadBody) {
+	message := map[string]any{
+		"bodyOf":  body.Of.Id,
+		"foundBy": player.Id,
+	}
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageFoundBody, message)
+}
 func MicPassed(from *models.Player, to *models.Player) {
 	if models.GlobalRoom.GameState.HoldingMic != from {
 		return
@@ -36,20 +43,51 @@ func MicPassed(from *models.Player, to *models.Player) {
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageMicPassed, message)
 }
 
-func Vote() {} // TODO: Add voting system and something to hold votes
+func Voted(from *models.Player, forWho *models.Player) {
+	vote := models.GlobalRoom.GameState.CurrentVote
+	if !from.Alive || !forWho.Alive || vote.CurrentlyVoting.Identity != from {
+		return
+	}
+	singleVote := models.SingleVote{From: from, ForWho: forWho}
+	vote.VoteChannel <- singleVote
+	message := map[string]any{
+		"from": from.Id,
+		"for":  forWho.Id,
+	}
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteReceived, message)
 
-func Start() {
+}
+func SummarizeVote(eliminated *models.Player, voteAmount int) {
+	if !eliminated.Alive {
+		return
+	}
+	message := map[string]any{
+		"eliminated":    eliminated.Id,
+		"amountOfVotes": voteAmount,
+	}
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteSummary, message)
+}
+func SendState(to *models.Player) {
+
+	roomData := map[string]any{
+		"players":   models.GlobalRoom.Players.Map(),
+		"gameState": models.GlobalRoom.GameState.Map(),
+	}
+
+	json.NewEncoder(to.Connection).Encode(roomData)
+}
+func StartGame() {
 	if models.GlobalRoom.GameState.Started {
 		return
 	}
-	models.GlobalRoom.GameState.Started = true
+	models.GlobalRoom.StartGame()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageStart, nil)
 }
-func End() {
+func EndGame() {
 	if !models.GlobalRoom.GameState.Started {
 		return
 	}
-	var summary map[string]any = nil // TODO: Add game summary and send to players
-	models.GlobalRoom.GameState.Started = false
+	var summary map[string]any = nil    // TODO: Add game summary and send to players
+	models.GlobalRoom.FinishGame(false) // TODO: Change that
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageEnd, summary)
 }
