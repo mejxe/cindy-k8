@@ -2,7 +2,7 @@ package models
 
 type Room struct {
 	Players         *Players
-	GameMaster      *GameMaster
+	GameMaster      *GameMaster // one game master per game, connected to separate ws
 	GameState       *GameState
 	ClientInChannel chan ClientMessage // user requests come through here
 	GMInChannel     chan GMMessage     // gm requests come through here
@@ -19,15 +19,29 @@ type GameState struct {
 	CurrentVote     *Vote
 }
 
-// room implementation block
-func (r *Room) StartGame() {
-	r.GameState.Started = true
-	r.GameState.Round = 0
-	r.GameState.NumPlayersAlive = len(GlobalRoom.Players.Players)
+// gs implementation block
+// methods that set gamestate fields
+func (g *GameState) StartGame() {
+	g.Started = true
+	g.Round = 0
+	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
 }
-func (r *Room) FinishGame(syndicateWins bool) {
-	r.GameState.Started = false
-	r.OutChannel <- ServerMessage{}
+func (g *GameState) NextNight() {
+	if !g.Started || g.Night {
+		return
+	}
+	g.Night = true
+}
+
+func (g *GameState) NextRound() {
+	if !g.Started || !g.Night {
+		return
+	}
+	g.Round++
+	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
+}
+func (g *GameState) FinishGame(syndicateWins bool) {
+	g.Started = false
 
 }
 

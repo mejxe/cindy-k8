@@ -27,6 +27,7 @@ type Players struct {
 	Players map[int]*Player
 }
 type DeadBody struct {
+	// representation of a Dead Body, only one per round atm, stored in gamestate, can be reported
 	Of       *Player
 	KilledBy *Player
 }

@@ -8,14 +8,16 @@ import (
 )
 
 func getIdentity(token string) *models.Player {
+	// find identity based on provided user token
 	for _, p := range players.Players {
 		if p.Token == token {
-			return &p
+			return p
 		}
 	}
 	return nil
 }
 func generateToken() string {
+	// generate token for verification of the connection (user creates a character -> gets a token -> verifies himself on ws)
 	var token string = ""
 	r := rand.Reader
 	for range 5 {

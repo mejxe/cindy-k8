@@ -6,7 +6,10 @@ import (
 	"github.com/mejxe/cindy-k8/internal/models"
 )
 
+// FLOW: (Modify state/Pass data to modify state) and notify user client(s)
+
 func Eliminated(syndicate *models.Player, citizen *models.Player) {
+	// called when player is killed by syndicate
 	if !syndicate.Syndicate || citizen.Syndicate || !citizen.Alive {
 		return
 	}
@@ -18,6 +21,7 @@ func Eliminated(syndicate *models.Player, citizen *models.Player) {
 }
 
 func FoundBody(player *models.Player, body *models.DeadBody) {
+	// called when player found a body, notifies only the player
 	message := map[string]any{
 		"bodyOf":   body.Of.Id,
 		"killedBy": body.KilledBy,
@@ -25,6 +29,7 @@ func FoundBody(player *models.Player, body *models.DeadBody) {
 	json.NewEncoder(player.Connection).Encode(models.NewServerMessage(models.ServerMessageFoundBody, message))
 }
 func ReportedBody(player *models.Player, body *models.DeadBody) {
+	// called when player reported the body he found to everyone
 	message := map[string]any{
 		"bodyOf":  body.Of.Id,
 		"foundBy": player.Id,
@@ -32,6 +37,7 @@ func ReportedBody(player *models.Player, body *models.DeadBody) {
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageFoundBody, message)
 }
 func MicPassed(from *models.Player, to *models.Player) {
+	// called when player passed the mic to another player
 	if models.GlobalRoom.GameState.HoldingMic != from {
 		return
 	}
@@ -44,6 +50,7 @@ func MicPassed(from *models.Player, to *models.Player) {
 }
 
 func Voted(from *models.Player, forWho *models.Player) {
+	// called when player voted
 	vote := models.GlobalRoom.GameState.CurrentVote
 	if !from.Alive || !forWho.Alive || vote.CurrentlyVoting.Identity != from {
 		return
@@ -58,9 +65,11 @@ func Voted(from *models.Player, forWho *models.Player) {
 
 }
 func SummarizeVote(eliminated *models.Player, voteAmount int) {
+	// called when vote ends
 	if !eliminated.Alive {
 		return
 	}
+	eliminated.Alive = false
 	message := map[string]any{
 		"eliminated":    eliminated.Id,
 		"amountOfVotes": voteAmount,
@@ -68,6 +77,7 @@ func SummarizeVote(eliminated *models.Player, voteAmount int) {
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteSummary, message)
 }
 func SendState(to *models.Player) {
+	// called when user requested state
 
 	roomData := map[string]any{
 		"players":   models.GlobalRoom.Players.Map(),
@@ -80,14 +90,14 @@ func StartGame() {
 	if models.GlobalRoom.GameState.Started {
 		return
 	}
-	models.GlobalRoom.StartGame()
+	models.GlobalRoom.GameState.StartGame()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageStart, nil)
 }
 func EndGame() {
 	if !models.GlobalRoom.GameState.Started {
 		return
 	}
-	var summary map[string]any = nil    // TODO: Add game summary and send to players
-	models.GlobalRoom.FinishGame(false) // TODO: Change that
+	var summary map[string]any = nil              // TODO: Add game summary and send to players
+	models.GlobalRoom.GameState.FinishGame(false) // TODO: Change that
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageEnd, summary)
 }

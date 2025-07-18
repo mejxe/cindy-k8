@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/mejxe/cindy-k8/internal/models"
+	"github.com/mejxe/cindy-k8/internal/service"
 	"golang.org/x/net/websocket"
 )
 
@@ -70,11 +71,11 @@ func HandleRoom(ws *websocket.Conn) {
 
 	// send identity data and room data to display characters
 	ws.Write([]byte(fmt.Sprintf("You are: %s", identity.String())))
-	sendRoomData(ws)
+	models.GlobalRoom.ClientInChannel <- models.NewClientMessage(models.ClientMessageGetState, identity, nil) // send get state request
 
 	buf := make([]byte, 1024)
 	for {
-		// read, deserialize, and pass for further handling
+		// read, deserialize, and pass messages for further handling
 		n, err := ws.Read(buf)
 		if err != nil {
 			break

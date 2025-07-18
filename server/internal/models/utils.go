@@ -10,6 +10,7 @@ func (p *Player) String() string {
 	return fmt.Sprintf("%s %s\n%s", p.FirstName, p.LastName, p.Occupation)
 }
 func (p *Player) Map() map[string]string {
+	// toMap()
 	tmap := make(map[string]string)
 	tmap["id"] = strconv.Itoa(p.Id)
 	tmap["firstName"] = p.FirstName
@@ -29,6 +30,7 @@ func (ps *Players) String() string {
 	return str
 }
 func (ps *Players) Map() map[string]map[string]string {
+	// toMap()
 	playersMap := make(map[string]map[string]string)
 	for i, p := range ps.Players {
 		playersMap[fmt.Sprintf("player%d", i)] = p.Map()
@@ -39,6 +41,7 @@ func (ps *Players) Map() map[string]map[string]string {
 // END
 
 func (gs *GameState) Map() map[string]string {
+	// toMap()
 	tmap := map[string]string{
 		"round":           strconv.Itoa(gs.Round),
 		"night":           strconv.FormatBool(gs.Night),

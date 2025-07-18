@@ -2,6 +2,10 @@ package models
 
 type MessageType string
 
+// defined messages that have to match the frontend
+// app flow:
+// client requests with msg type -> server parses based on msg type -> server responds with another msg type
+
 // Client Message Types
 const (
 	ClientMessagePassMic  MessageType = "mic"
@@ -36,17 +40,20 @@ const (
 )
 
 type ClientMessage struct {
+	// message after being parsed from user request
 	Type   MessageType    `json:"type"`
 	Author *Player        `json:"author"`
 	Body   map[string]any `json:"body"`
 }
 type ServerMessage struct {
-	Type MessageType
-	Body map[string]any
+	// message that server sends out as json
+	Type MessageType    `json:"type"`
+	Body map[string]any `json:"body"`
 }
 type GMMessage struct {
-	Type MessageType
-	Body map[string]any
+	// message after being parsed from gm request
+	Type MessageType    `json:"type"`
+	Body map[string]any `json:"body"`
 }
 
 func NewClientMessage(messageType MessageType, author *Player, body map[string]any) ClientMessage {
