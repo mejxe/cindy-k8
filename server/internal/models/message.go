@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 type MessageType string
 
 // defined messages that have to match the frontend
@@ -17,7 +19,7 @@ const (
 // GM MessageTypes
 const (
 	GMMessageTypeStart     MessageType = "start"
-	GMMessageTypePause     MessageType = "pause"
+	GMMessageTypeNext      MessageType = "next"
 	GMMessageTypeEnd       MessageType = "end"
 	GMMessageTypeKick      MessageType = "kick"
 	GMMessageTypeKill      MessageType = "kill"
@@ -26,6 +28,7 @@ const (
 )
 
 // Server Message Types
+// TODO: think about hard typing all the messageTypes
 const (
 	ServerMessageStart        MessageType = "started"
 	ServerMessageEnd          MessageType = "ended"
@@ -34,9 +37,12 @@ const (
 	ServerMessageToken        MessageType = "token"
 	ServerMessageFoundBody    MessageType = "body"
 	ServerMessageVoteReceived MessageType = "voted"
+	ServerMessageNightStarted MessageType = "nightStarted"
+	ServerMessageNextRound    MessageType = "nextRound"
 	ServerMessageAwaitVote    MessageType = "waitingForVote"
 	ServerMessageVoteSummary  MessageType = "voteSummary"
-	Error                     MessageType = "error"
+	ServerMessageSendState    MessageType = "gameState"
+	ServerError               MessageType = "error"
 )
 
 type ClientMessage struct {
@@ -56,6 +62,10 @@ type GMMessage struct {
 	Body map[string]any `json:"body"`
 }
 
+func (sm *ServerMessage) String() string {
+	return fmt.Sprintf("Type: %s\nBody: %s", sm.Type, sm.Body)
+}
+
 func NewClientMessage(messageType MessageType, author *Player, body map[string]any) ClientMessage {
 	return ClientMessage{
 		Type: messageType, Author: author, Body: body,
@@ -68,4 +78,10 @@ func NewServerMessage(messageType MessageType, body map[string]any) ServerMessag
 	return ServerMessage{
 		Type: messageType, Body: body,
 	}
+}
+func NewError(message string) ServerMessage {
+	msg := map[string]any{
+		"message": message,
+	}
+	return NewServerMessage(ServerError, msg)
 }

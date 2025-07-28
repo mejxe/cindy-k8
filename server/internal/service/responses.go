@@ -83,8 +83,7 @@ func SendState(to *models.Player) {
 		"players":   models.GlobalRoom.Players.Map(),
 		"gameState": models.GlobalRoom.GameState.Map(),
 	}
-
-	json.NewEncoder(to.Connection).Encode(roomData)
+	json.NewEncoder(to.Connection).Encode(models.NewServerMessage(models.ServerMessageSendState, roomData))
 }
 func StartGame() {
 	if models.GlobalRoom.GameState.Started {
@@ -100,4 +99,17 @@ func EndGame() {
 	var summary map[string]any = nil              // TODO: Add game summary and send to players
 	models.GlobalRoom.GameState.FinishGame(false) // TODO: Change that
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageEnd, summary)
+}
+func NextRound() {
+	if !models.GlobalRoom.GameState.Started {
+		return
+	}
+	if models.GlobalRoom.GameState.Night {
+		models.GlobalRoom.GameState.NextRound()
+		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNextRound, nil)
+	} else {
+		models.GlobalRoom.GameState.NextNight()
+		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
+	}
+
 }

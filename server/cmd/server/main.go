@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/mejxe/cindy-k8/internal/handlers"
+	"github.com/mejxe/cindy-k8/internal/api"
+	"github.com/mejxe/cindy-k8/internal/ws"
 	"golang.org/x/net/websocket"
 )
 
@@ -16,10 +17,13 @@ func main() {
 	port := ":8080"
 
 	fmt.Printf("Server started at localhost%s\n", port)
+	go ws.HandleClientMessages()
+	go ws.HandleGMMessages()
+	go ws.HandleSending()
 	http.Handle("/", http.FileServerFS(reactDir))
-	http.Handle("/create", http.HandlerFunc(handlers.HandleJoin))
-	http.Handle("/ws", websocket.Handler(handlers.HandleRoom))
-	http.Handle("/gm", websocket.Handler(handlers.HandleGmConnection))
+	http.Handle("/create", http.HandlerFunc(api.HandleCreate))
+	http.Handle("/ws", websocket.Handler(ws.HandleRoom))
+	http.Handle("/gm", websocket.Handler(ws.HandleGmConnection))
 	log.Fatal(http.ListenAndServe(port, nil))
 
 }

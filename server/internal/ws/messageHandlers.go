@@ -1,7 +1,11 @@
 package ws
 
-import "github.com/mejxe/cindy-k8/internal/models"
-import "github.com/mejxe/cindy-k8/internal/service"
+import (
+	"encoding/json"
+
+	"github.com/mejxe/cindy-k8/internal/models"
+	"github.com/mejxe/cindy-k8/internal/service"
+)
 
 func HandleClientMessages() {
 	// handles ClientInChannel where structured client messages come throug calls methods
@@ -24,12 +28,22 @@ func HandleGMMessages() {
 		switch msg.Type {
 		case models.GMMessageSummarizeVote:
 			service.HandleVoteSummary(msg)
-
 		case models.GMMessageTypeStart:
 			service.HandleStartGame()
-
 		case models.GMMessageTypeEnd:
 			service.HandleEndGame()
+		case models.GMMessageTypeNext:
+			service.HandleGameFlow()
+		}
+	}
+}
+func HandleSending() {
+	// Send to everyone messages flowing through OutChannel
+	for msgToSend := range room.OutChannel {
+		println(msgToSend.String())
+		jsonMsg, _ := json.Marshal(msgToSend)
+		for _, p := range players.Players {
+			p.Connection.Write(jsonMsg)
 		}
 	}
 }

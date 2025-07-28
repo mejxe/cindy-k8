@@ -89,5 +89,7 @@ func HandleEndGame() {
 	// called when GM requests the game to end
 	EndGame()
 }
-
-// TODO: ADD PAUSE/GIVE THE FULL GAME FLOW TO GM
+func HandleGameFlow() {
+	// cycle between pause and unpause
+	NextRound()
+}

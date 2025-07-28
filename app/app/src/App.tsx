@@ -1,38 +1,42 @@
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import { defaultState, States, type AppStateType, type StateKeys } from './types/types'
+import { connectWS } from './services/ws'
+import { AppContext } from './store/gamestate-context'
+import CharacterForm from './components/CharacterForm'
+import Lobby from './components/Lobby'
+import Header from './components/Headers'
+
 
 export default function App() {
 
+  // TODO: Make it into custom hook maybe
+  const [appState, setAppState] = useState<StateKeys>(States.Lobby)
+  const websocket = useRef<WebSocket | null>(null)
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
+  const [gameState, setGameState] = useState<AppStateType>(defaultState)
+
+  useEffect(() => {
+    if (token === null) {
+      setAppState(States.CharacterCreation)
+      return
+    }
+    connectWS(token, websocket, setAppState, setToken, setGameState)
+    localStorage.setItem("token", token)
+  }, [token])
+  const toRender = () => {
+    switch (appState) {
+      case States.Loading: return <><Header state={appState} /><main><h1>Loading...</h1></main></>;
+      case States.CharacterCreation: return <><Header state={appState} /><main><CharacterForm setToken={setToken} /></main></>;
+      case States.Lobby: return <><Header state={appState} /><main><Lobby /></main></>;
+      case States.Game: return <h1>Game</h1>
+    }
+  }
+
   return (<>
-    <Header />
-    <main>
-      <CharacterForm />
-    </main>
+    <AppContext.Provider value={gameState}>
+      {toRender()}
+    </AppContext.Provider>
   </>)
 }
-function Header() {
-  return <div id="header">
-    <h1>Welcome to Cindy-K8</h1>
-    <h2>Create your character</h2>
-  </div>
-}
-function CharacterForm() {
-  return <>
-    <form id="cform">
-      <label htmlFor="fname">First name</label>
-      <input type="text" name='fname'></input>
-      <label htmlFor="lname">Last name</label>
-      <input type="text" name='lname'></input>
-      <label htmlFor="occupation">Occupation</label>
-      <select id="mySelect" name="occupation">
-        <option value="cleaner">Cleaner</option>
-        <option value="shopkeeper">Shopkeeper</option>
-        <option value="carpenter">Carpenter</option>
-        <option value="goverment">Goverment official</option>
-        <option value="nurse">Nurse</option>
-        <option value="soldier">Soldier</option>
-      </select>
-    </form>
-  </>
-}
-
 
