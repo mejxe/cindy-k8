@@ -1,6 +1,8 @@
 import type { GameStateBody, ParsedWSMessage } from "../types/messageTypes"
 import { States, type AppStateType, type Player } from "../types/types"
 
+const temporaryPlayer1: Player = { firstName: "ziutek", lastName: "mualla", occupation: "zjadacz" }
+const temporaryPlayer2: Player = { firstName: "fiutek", lastName: "mualla", occupation: "zjadacz" }
 export function handleWSMessages(message: ParsedWSMessage, setAppState, websocket, setToken, setGameState) {
   switch (message.type) {
     case "error": {
@@ -17,7 +19,7 @@ export function handleWSMessages(message: ParsedWSMessage, setAppState, websocke
       }
 
       const updatedGameState: AppStateType = {
-        players: [],
+        players: [temporaryPlayer1, temporaryPlayer2],
         round: receivedGameState.gameState.round,
         numPlayersAlive: receivedGameState.gameState.numPlayersAlive,
         night: receivedGameState.gameState.night,
@@ -92,3 +94,20 @@ export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
   }
 }
 
+export function connectWSForGM(password: string, setVerified, setWS) {
+  const ws = new WebSocket(`http://localhost:8080/gm?password=${password}`)
+  ws.onopen = () => {
+    console.log("Ws connected.")
+    setWS(ws)
+    setVerified(true)
+  }
+  ws.onmessage = (event) => {
+    console.log(event.data)
+    // TODO: ADD HANDLER
+  }
+  ws.onclose = () => {
+    console.log("Ws disconnected")
+    setWS(null)
+    setVerified(false)
+  }
+}

@@ -139,7 +139,7 @@ main {
   font-size: 2rem;
   border-radius: 15px;
   text-transform: uppercase;
-  transition: 200ms;
+  transition: all 300ms, border 0ms;
   border-style: solid;
   border-width: 5px;
   border-color: #504B38;
@@ -155,13 +155,16 @@ main {
 }
 
 #cindy {
+  white-space: nowrap;
+}
+
+.gold {
   background-image: repeating-linear-gradient(to right, #a2682a 0%, #be8c3c 8%, #be8c3c 18%, #d3b15f 27%, #faf0a0 35%, #ffffc2 40%, #faf0a0 50%, #d3b15f 58%, #be8c3c 67%, #b17b32 77%, #bb8332 83%, #d4a245 88%, #e1b453 93%, #a4692a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-size: 150%;
   filter: drop-shadow(0 0 1px rgba(255, 200, 0, .3));
   animation: MoveBackgroundPosition 6s ease-in-out infinite;
-  white-space: nowrap;
 }
 
 @keyframes MoveBackgroundPosition {
@@ -223,6 +226,78 @@ main {
   font-size: clamp(1rem, 3vw, 1.4rem);
 }
 
+#lobby {
+  margin-top: 5vh;
+  height: auto;
+  width: auto;
+  padding: 50px 100px 150px;
+}
+
+div#players {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5vh;
+}
+
+.player img {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.player {
+  width: 8vw;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  border-style: solid;
+  border-radius: 20px;
+  padding: 20px;
+  min-width: 120px;
+  min-height: 150px;
+}
+
+.player h3,
+.player h4 {
+  font-size: clamp(1.2rem, 1.3vw, 1.5rem);
+  margin: 0;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.player h3 {
+  color: red;
+  line-height: 1rem;
+}
+
+.player .citizenName {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  gap: 10px;
+  text-align: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+#login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+}
+
+#login h1 {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 2.8rem;
+  padding-bottom: 3vh;
+}
+
 @media (max-width: 768px) {
   #cform {
     width: 98%;
@@ -241,6 +316,22 @@ main {
 }
 
 @media (max-width: 480px) {
+  .player {
+    min-width: 80px;
+    min-height: 120px;
+  }
+
+  #lobby {
+    border: none;
+    padding: 0;
+  }
+
+  .player h3,
+  .player h4 {
+
+    font-size: clamp(1.1rem, 1.2vw, 2rem);
+  }
+
   #root {
     padding-top: 1rem;
   }

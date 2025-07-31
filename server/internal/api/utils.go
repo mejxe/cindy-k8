@@ -1,8 +1,10 @@
 package api
 
 import (
+	"crypto/md5"
 	"crypto/rand"
 	"math/big"
+	"os"
 )
 
 func generateToken() string {
@@ -16,4 +18,14 @@ func generateToken() string {
 		token += string(rune(start + (rLet.Int64() % (stop - start))))
 	}
 	return token
+}
+func generateGMHashAndSave(password string) (ok bool, err error) {
+	// for persistent password on host machine TODO: add it eventually
+	ok = true
+	hashed := md5.Sum([]byte(password))
+	err = os.WriteFile("../../tmp/password", hashed[:], 0644)
+	if err != nil {
+		return !ok, err
+	}
+	return ok, nil
 }

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"crypto/md5"
 	"fmt"
 	"strconv"
 )
@@ -52,4 +53,18 @@ func (gs *GameState) Map() map[string]string {
 }
 func (cs *ClientMessage) String() string {
 	return fmt.Sprintf("author: %s\nbody: %s", cs.Author, cs.Body)
+}
+
+// GM Implementation block
+func NewGM(password string) *GameMaster {
+	return &GameMaster{
+		Connected:  false,
+		Connection: nil,
+		Password:   generateMD5(password),
+	}
+}
+
+func generateMD5(pass string) []byte {
+	hash := md5.Sum([]byte(pass))
+	return hash[:]
 }

@@ -3,10 +3,9 @@ import './App.css'
 import { defaultState, States, type AppStateType, type StateKeys } from './types/types'
 import { connectWS } from './services/ws'
 import { AppContext } from './store/gamestate-context'
-import CharacterForm from './components/CharacterForm'
-import Lobby from './components/Lobby'
-import Header from './components/Headers'
-
+import CharacterForm from './components/client/CharacterForm'
+import Lobby from './components/client/Lobby'
+import Header from './components/client/Header'
 
 export default function App() {
 

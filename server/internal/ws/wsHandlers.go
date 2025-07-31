@@ -11,14 +11,25 @@ import (
 var room = models.GlobalRoom
 var players = models.GlobalRoom.Players
 
-func HandleGmConnection(w *websocket.Conn) {
+func HandleGmConnection(ws *websocket.Conn) {
 	// Handle join, auth, and then Unmarshal and send messages to GMInChannel for handling
 	println("Game master joined the lobby.")
+
+	if !ws.Request().URL.Query().Has("password") {
+		ws.Write([]byte("Password not provided."))
+		return
+	}
+	if !VerifyGM(ws.Request().URL.Query().Get("password")) {
+		ws.Write([]byte("Incorrect password."))
+		return
+	}
+	println("Game Master verified correctly!")
+	ws.Write([]byte("Correct")) // TODO: Change to send GM State (state with more info)
 	room.GameMaster.Connected = true
-	room.GameMaster.Connection = w
+	room.GameMaster.Connection = ws
 	buf := make([]byte, 1024)
 	for {
-		n, err := w.Read(buf)
+		n, err := ws.Read(buf)
 
 		if err != nil {
 			break

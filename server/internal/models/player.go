@@ -9,6 +9,7 @@ import (
 type GameMaster struct {
 	Connection *websocket.Conn
 	Connected  bool
+	Password   []byte
 }
 
 type Player struct {
@@ -30,6 +31,10 @@ type DeadBody struct {
 	// representation of a Dead Body, only one per round atm, stored in gamestate, can be reported
 	Of       *Player
 	KilledBy *Player
+}
+
+func InitGM(password string) {
+
 }
 
 // Globs

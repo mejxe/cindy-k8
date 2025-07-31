@@ -9,6 +9,7 @@ import (
 
 // FLOW: Parse the ClientMessage from the request -> call response function with parsed parameters
 
+// CLIENT
 func HandleReportBody(msg models.ClientMessage) {
 	// called when player reports a body, checks if the bodyData is correct
 	bodyOf, ok := msg.Body["bodyOf"].(string)
@@ -75,6 +76,9 @@ func HandleSendState(msg models.ClientMessage) {
 	to := msg.Author
 	SendState(to)
 }
+
+// GM
+
 func HandleVoteSummary(msg models.GMMessage) {
 	// called when GM requests data to be summed (done automatically at the end of the vote)
 	vote := models.GlobalRoom.GameState.CurrentVote

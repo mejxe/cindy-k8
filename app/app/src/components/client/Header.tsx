@@ -1,4 +1,4 @@
-import { States, type StateKeys } from "../types/types";
+import { States, type StateKeys } from "../../types/types";
 
 export default function Header({ state }: { state: StateKeys }) {
   const secondParagraph = () => {
@@ -10,7 +10,7 @@ export default function Header({ state }: { state: StateKeys }) {
     }
   }
   return <div id="header">
-    <h1>Welcome to <a id='cindy'>Cindy-K8</a></h1>
+    <h1>Welcome to <a id='cindy' className="gold">Cindy-K8</a></h1>
     {secondParagraph()}
 
   </div>
