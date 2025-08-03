@@ -78,13 +78,22 @@ func SummarizeVote(eliminated *models.Player, voteAmount int) {
 }
 func SendState(to *models.Player) {
 	// called when user requested state
-
-	roomData := map[string]any{
-		"players":   models.GlobalRoom.Players.Map(),
-		"gameState": models.GlobalRoom.GameState.Map(),
-	}
-	json.NewEncoder(to.Connection).Encode(models.NewServerMessage(models.ServerMessageSendState, roomData))
+	json.NewEncoder(to.Connection).Encode(models.NewServerMessage(models.ServerMessageSendState,
+		models.GlobalRoom.GetState()))
 }
+
+func SendStateToEveryone() {
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageSendState,
+		models.GlobalRoom.GetState())
+}
+
+// GM
+
+func SendGMState() {
+	json.NewEncoder(models.GlobalRoom.GameMaster.Connection).
+		Encode(models.NewServerMessage(models.ServerMessageSendState, models.GlobalRoom.GetStateGM()))
+}
+
 func StartGame() {
 	if models.GlobalRoom.GameState.Started {
 		return

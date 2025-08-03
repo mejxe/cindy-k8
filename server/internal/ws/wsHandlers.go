@@ -24,9 +24,11 @@ func HandleGmConnection(ws *websocket.Conn) {
 		return
 	}
 	println("Game Master verified correctly!")
-	ws.Write([]byte("Correct")) // TODO: Change to send GM State (state with more info)
 	room.GameMaster.Connected = true
 	room.GameMaster.Connection = ws
+	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendState}
+	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendStateToEveryone}
+	println("sent state request.")
 	buf := make([]byte, 1024)
 	for {
 		n, err := ws.Read(buf)
@@ -71,6 +73,7 @@ func HandleRoom(ws *websocket.Conn) {
 
 	// send identity data and room data to display characters
 	models.GlobalRoom.ClientInChannel <- models.NewClientMessage(models.ClientMessageGetState, identity, nil) // send get state request
+	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendState}
 
 	buf := make([]byte, 1024)
 	for {

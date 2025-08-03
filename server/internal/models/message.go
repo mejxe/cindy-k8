@@ -18,13 +18,15 @@ const (
 
 // GM MessageTypes
 const (
-	GMMessageTypeStart     MessageType = "start"
-	GMMessageTypeNext      MessageType = "next"
-	GMMessageTypeEnd       MessageType = "end"
-	GMMessageTypeKick      MessageType = "kick"
-	GMMessageTypeKill      MessageType = "kill"
-	GMMessageTypeAuth      MessageType = "auth"
-	GMMessageSummarizeVote MessageType = "summarize"
+	GMMessageTypeStart           MessageType = "start"
+	GMMessageTypeNext            MessageType = "next"
+	GMMessageTypeEnd             MessageType = "end"
+	GMMessageTypeKick            MessageType = "kick"
+	GMMessageTypeKill            MessageType = "kill"
+	GMMessageTypeAuth            MessageType = "auth"
+	GMMessageSummarizeVote       MessageType = "summarize"
+	GMMessageSendState           MessageType = "gsgm"
+	GMMessageSendStateToEveryone MessageType = "gsGlobal"
 )
 
 // Server Message Types
@@ -76,6 +78,14 @@ func NewServerMessage(messageType MessageType, body map[string]any) ServerMessag
 		body = map[string]any{}
 	}
 	return ServerMessage{
+		Type: messageType, Body: body,
+	}
+}
+func NewGMMessage(messageType MessageType, body map[string]any) GMMessage {
+	if body == nil {
+		body = map[string]any{}
+	}
+	return GMMessage{
 		Type: messageType, Body: body,
 	}
 }

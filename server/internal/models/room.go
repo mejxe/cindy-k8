@@ -50,7 +50,7 @@ func (g *GameState) FinishGame(syndicateWins bool) {
 var GlobalRoom *Room = &Room{
 	Players:         &Players{Players: make(map[int]*Player)},
 	GameState:       &GameState{},
-	ClientInChannel: make(chan ClientMessage),
-	GMInChannel:     make(chan GMMessage),
-	OutChannel:      make(chan ServerMessage),
+	ClientInChannel: make(chan ClientMessage, 10),
+	GMInChannel:     make(chan GMMessage, 2),
+	OutChannel:      make(chan ServerMessage, 10),
 }

@@ -76,8 +76,18 @@ func HandleSendState(msg models.ClientMessage) {
 	to := msg.Author
 	SendState(to)
 }
+func HandleSendStateToEveryone() {
+	SendStateToEveryone()
+}
 
 // GM
+
+func HandleSendGMState() {
+	if !models.GlobalRoom.GameMaster.Connected {
+		return
+	}
+	SendGMState()
+}
 
 func HandleVoteSummary(msg models.GMMessage) {
 	// called when GM requests data to be summed (done automatically at the end of the vote)

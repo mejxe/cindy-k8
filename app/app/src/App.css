@@ -41,7 +41,6 @@ button {
   font: inherit
 }
 
-
 #header {
   margin-bottom: 3rem;
 }
@@ -65,98 +64,10 @@ main {
 }
 
 
-#cform .options {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  border-style: inset;
-  border-radius: 15px;
-  border-width: 8px;
-  padding: 3rem 3rem 5rem;
-  margin-bottom: 2rem;
-  border-color: #504B38;
-}
-
-#cform input {
-  margin-bottom: 1.7rem;
-  font-size: 1.5rem;
-  border-radius: 14px;
-  padding: 1rem;
-  border-style: solid;
-  border-width: 5px;
-  border-color: #504B38;
-  transition: 200ms;
-}
-
-
-
-#cform label {
-  font-size: 1.5rem;
-  margin-bottom: 7px;
-  font-weight: 600;
-  text-transform: uppercase;
-  transition: 200ms;
-}
-
-#cform input,
-#cform select,
-#cform button {
-  background-color: transparent;
-}
-
-#cform legend {
-  position: relative;
-  top: 20px;
-  left: 12px;
-  padding: 0 10px;
-  border-radius: 10px;
-  background-color: transparent;
-  background: linear-gradient(135deg, #242424 0%, #2a2520 50%, #242424 100%);
-  font-size: 1.4rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  transition: 200ms;
-}
-
-#cform fieldset {
-  border: none;
-}
-
-#cform select {
-  font-size: 1.5rem;
-  padding: 0.8rem;
-  border-radius: 15px;
-  transition: 200ms;
-  border-style: solid;
-  border-width: 5px;
-  border-color: #504B38;
-}
-
-
-
-#cform button {
-  padding: 1.5rem;
-  font-size: 2rem;
-  border-radius: 15px;
-  text-transform: uppercase;
-  transition: all 300ms, border 0ms;
-  border-style: solid;
-  border-width: 5px;
-  border-color: #504B38;
-}
-
-#cform button:hover {
-  background-image: repeating-linear-gradient(to right, #a2682a 0%, #be8c3c 8%, #be8c3c 18%, #d3b15f 27%, #faf0a0 35%, #ffffc2 40%, #faf0a0 50%, #d3b15f 58%, #be8c3c 67%, #b17b32 77%, #bb8332 83%, #d4a245 88%, #e1b453 93%, #a4692a 100%);
-  background-size: 150%;
-  filter: drop-shadow(0 0 1px rgba(255, 200, 0, .3));
-  animation: MoveBackgroundPosition 6s ease-in-out infinite;
-  color: black;
-  border-color: transparent;
-}
-
 #cindy {
   white-space: nowrap;
 }
+
 
 .gold {
   background-image: repeating-linear-gradient(to right, #a2682a 0%, #be8c3c 8%, #be8c3c 18%, #d3b15f 27%, #faf0a0 35%, #ffffc2 40%, #faf0a0 50%, #d3b15f 58%, #be8c3c 67%, #b17b32 77%, #bb8332 83%, #d4a245 88%, #e1b453 93%, #a4692a 100%);
@@ -182,50 +93,6 @@ main {
 }
 
 
-#cform {
-  width: 95%;
-  max-width: 600px;
-}
-
-#cform input,
-#cform select {
-  width: 100%;
-  max-width: 400px;
-  min-width: 200px;
-  box-sizing: border-box;
-}
-
-#cform .options {
-  width: 100%;
-  box-sizing: border-box;
-  padding: clamp(1rem, 4vw, 3rem) clamp(1rem, 4vw, 3rem) clamp(2rem, 5vw, 5rem);
-}
-
-#header h1 {
-  font-size: clamp(3rem, 8vw, 4.5rem);
-}
-
-#cform label {
-  font-size: clamp(1rem, 3vw, 1.5rem);
-}
-
-#cform input,
-#cform select {
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  padding: clamp(0.5rem, 2vw, 1rem);
-}
-
-#cform button {
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  padding: clamp(0.8rem, 2.5vw, 1.5rem);
-  width: 100%;
-  max-width: 250px;
-}
-
-#cform legend {
-  font-size: clamp(1rem, 3vw, 1.4rem);
-}
-
 #lobby {
   margin-top: 5vh;
   height: auto;
@@ -233,55 +100,6 @@ main {
   padding: 50px 100px 150px;
 }
 
-div#players {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 5vh;
-}
-
-.player img {
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-.player {
-  width: 8vw;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  border-style: solid;
-  border-radius: 20px;
-  padding: 20px;
-  min-width: 120px;
-  min-height: 150px;
-}
-
-.player h3,
-.player h4 {
-  font-size: clamp(1.2rem, 1.3vw, 1.5rem);
-  margin: 0;
-  text-align: center;
-  text-transform: capitalize;
-}
-
-.player h3 {
-  color: red;
-  line-height: 1rem;
-}
-
-.player .citizenName {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  gap: 10px;
-  text-align: center;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
 
 #login {
   display: flex;

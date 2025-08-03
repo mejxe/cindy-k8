@@ -16,9 +16,12 @@ export const defaultState: AppStateType = {
   holdingMic: null
 }
 export type Player = {
+  id: number,
   firstName: string,
   lastName: string,
   occupation: string,
+  alive: boolean
+  syndicate: boolean
 }
 export type AppStateType = {
   players: Player[],

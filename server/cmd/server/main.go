@@ -22,7 +22,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	println("Create GM password for this session")
 	scanner.Scan()
-	password := scanner.Text()
+	password := "admin" //TODO: change to: scanner.Text()
 	fmt.Printf("Your GM password is: %s\n", password)
 	models.GlobalRoom.GameMaster = models.NewGM(password)
 

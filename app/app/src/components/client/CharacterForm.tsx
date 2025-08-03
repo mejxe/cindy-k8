@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react"
+import "../../styles/form.css"
 
 export default function CharacterForm({ setToken }: { setToken: Dispatch<SetStateAction<string | null>> }) {
 

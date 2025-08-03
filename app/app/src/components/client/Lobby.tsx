@@ -2,6 +2,7 @@ import { useContext } from "react"
 import playerImg from "../../assets/player.png"
 import { AppContext } from "../../store/gamestate-context"
 import type { Player } from "../../types/types"
+import "../../styles/player.css"
 
 
 export default function Lobby() {
@@ -9,22 +10,22 @@ export default function Lobby() {
   console.log(state)
   return (<div id="lobby">
     <h1 id="meet">Meet the citizens!</h1>
-    <div id="players">
+    <ul id="players">
       {state.players.map((p) => {
         return Player(p)
       })}
-    </div>
+    </ul>
   </div>)
 }
 function Player(player: Player) {
   return (
-    <div className="player">
+    <li className="player">
       <img src={playerImg} />
       <div className="citizenName">
         <h3>{player.firstName}</h3>
         <h3>{player.lastName}</h3>
       </div>
       <h4>{player.occupation}</h4>
-    </div>
+    </li>
   )
 }
