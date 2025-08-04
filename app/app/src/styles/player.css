@@ -50,6 +50,7 @@ ul#players {
   border-color: rgba(212, 175, 55, 0.4);
 }
 
+
 .player h4 {
   font-size: clamp(1rem, 1.2vw, 1.3rem);
   margin: 0;
@@ -58,6 +59,10 @@ ul#players {
   color: rgba(212, 175, 55, 0.8);
   font-weight: 600;
   font-style: italic;
+}
+
+#syndicate {
+  color: darkred;
 }
 
 .player h3 {
@@ -177,6 +182,7 @@ ul#players {
 .player.dead button {
   opacity: 0.3;
 }
+
 
 @media (max-width: 480px) {
   .player {

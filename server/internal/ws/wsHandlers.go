@@ -2,8 +2,8 @@ package ws
 
 import (
 	"encoding/json"
-	"fmt"
 
+	"github.com/mejxe/cindy-k8/internal/logging"
 	"github.com/mejxe/cindy-k8/internal/models"
 	"golang.org/x/net/websocket"
 )
@@ -13,7 +13,7 @@ var players = models.GlobalRoom.Players
 
 func HandleGmConnection(ws *websocket.Conn) {
 	// Handle join, auth, and then Unmarshal and send messages to GMInChannel for handling
-	println("Game master joined the lobby.")
+	logging.Info.Println("Game master joined the lobby.")
 
 	if !ws.Request().URL.Query().Has("password") {
 		ws.Write([]byte("Password not provided."))
@@ -23,12 +23,13 @@ func HandleGmConnection(ws *websocket.Conn) {
 		ws.Write([]byte("Incorrect password."))
 		return
 	}
-	println("Game Master verified correctly!")
+
+	logging.Success.Println("Game Master verified correctly!")
+
 	room.GameMaster.Connected = true
 	room.GameMaster.Connection = ws
 	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendState}
 	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendStateToEveryone}
-	println("sent state request.")
 	buf := make([]byte, 1024)
 	for {
 		n, err := ws.Read(buf)
@@ -37,9 +38,11 @@ func HandleGmConnection(ws *websocket.Conn) {
 			break
 		}
 
+		msg := buf[:n]
+		logging.Info.Printf("Received: %s\n", string(msg))
 		var gmMsg models.GMMessage
 
-		if json.Unmarshal(buf[:n], &gmMsg) != nil {
+		if json.Unmarshal(msg, &gmMsg) != nil {
 			continue
 		}
 		models.GlobalRoom.GMInChannel <- gmMsg
@@ -47,7 +50,7 @@ func HandleGmConnection(ws *websocket.Conn) {
 	}
 	room.GameMaster.Connected = false
 	room.GameMaster.Connection = nil
-	println("Game master disconnected.")
+	logging.Warning.Println("Game master disconnected.")
 
 }
 
@@ -57,15 +60,15 @@ func HandleRoom(ws *websocket.Conn) {
 		ws.Write([]byte("Token not provided."))
 		return
 	}
-	fmt.Printf("New connection opened!\n")
+	logging.Info.Printf("New connection opened!\n")
 
 	token := ws.Request().URL.Query().Get("token")
-	fmt.Printf("User token is: %s\n", token)
+	logging.Info.Printf("User token is: %s\n", token)
 
 	identity := getIdentity(token)
 
 	if identity == nil {
-		println("User token does not match any character tokens.")
+		logging.Error.Println("User token does not match any character tokens.")
 		json.NewEncoder(ws).Encode(models.NewError("Invalid token for this session."))
 		return
 	}
@@ -83,12 +86,12 @@ func HandleRoom(ws *websocket.Conn) {
 			break
 		}
 		msg := buf[:n]
-		fmt.Printf("Read message: %s\n", string(msg))
+		logging.Info.Printf("Read message: %s\n", string(msg))
 
 		var clientMsg models.ClientMessage
 
 		if json.Unmarshal(msg, &clientMsg) != nil {
-			fmt.Printf("Error: Can't parse message %s\n", string(msg))
+			logging.Error.Printf("Error: Can't parse message %s\n", string(msg))
 			continue
 		}
 

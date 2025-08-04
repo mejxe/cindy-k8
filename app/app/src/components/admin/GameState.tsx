@@ -1,7 +1,8 @@
+import type { WSMessage } from "../../types/messageTypes";
 import type { AppStateType } from "../../types/types";
 import "./GameState.css"
 
-export default function GameState({ gamestate }: { gamestate: AppStateType }) {
+export default function GameState({ gamestate, ws }: { gamestate: AppStateType, ws: WebSocket }) {
   const night = gamestate.night ? "Nighttime" : "Daytime"
   const started = gamestate.started ? "started" : "Not started"
   const groupClassName = gamestate.started ? "control-group" : "control-group disabled"
@@ -9,6 +10,7 @@ export default function GameState({ gamestate }: { gamestate: AppStateType }) {
     <h1>Control Panel</h1>
 
     <div className="game-controls">
+      {/* Game Control */}
       <div className="control-group">
         <h4>
           Game Status
@@ -16,7 +18,7 @@ export default function GameState({ gamestate }: { gamestate: AppStateType }) {
             {started}
           </p>
         </h4>
-        <button className={`control-btn ${!gamestate.started ? 'primary' : ''}`}>
+        <button onClick={() => { sendStartRequest(ws) }} className={`control-btn ${!gamestate.started ? 'primary' : ''}`}>
           {gamestate.started ? "Stop Game" : "Start Game"}
         </button>
       </div>
@@ -53,4 +55,11 @@ export default function GameState({ gamestate }: { gamestate: AppStateType }) {
     </div>
   </div>
   )
+}
+
+function sendStartRequest(ws: WebSocket) {
+  const message: WSMessage = { type: "start", body: null }
+  ws.send(JSON.stringify(message))
+  // Send request
+  // wait for it to update
 }

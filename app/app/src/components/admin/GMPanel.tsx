@@ -12,9 +12,10 @@ export default function GMPanel() {
   const toRender = () => {
     switch (verified) {
       case true: {
+        if (ws === null) { return }
         return (<div>
           <PlayerList players={gameState.players} />
-          <GameState gamestate={gameState} />
+          <GameState ws={ws} gamestate={gameState} />
         </div>)
       }
       case false: {

@@ -2,8 +2,8 @@ package ws
 
 import (
 	"encoding/json"
-	"fmt"
 
+	"github.com/mejxe/cindy-k8/internal/logging"
 	"github.com/mejxe/cindy-k8/internal/models"
 	"github.com/mejxe/cindy-k8/internal/service"
 )
@@ -46,7 +46,7 @@ func HandleGMMessages() {
 func HandleSending() {
 	// Send to everyone messages flowing through OutChannel
 	for msgToSend := range room.OutChannel {
-		fmt.Printf("SENDING %s", msgToSend.String())
+		logging.Info.Printf("Sending %s", msgToSend.String())
 
 		// the message
 		jsonMsg, _ := json.Marshal(msgToSend)

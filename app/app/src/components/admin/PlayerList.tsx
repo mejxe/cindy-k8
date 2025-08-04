@@ -19,6 +19,7 @@ function Player(player: Player) {
         <h3>{player.lastName}</h3>
       </div>
       <h4>{player.occupation}</h4>
+      {player.syndicate ? <h4 id="syndicate">Syndicate</h4> : null}
       <div id="btns">
         <button>kick</button>
         <button>kill</button>
