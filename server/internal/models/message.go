@@ -18,14 +18,15 @@ const (
 
 // GM MessageTypes
 const (
-	GMMessageTypeStart           MessageType = "start"
-	GMMessageTypeNext            MessageType = "next"
-	GMMessageTypeEnd             MessageType = "end"
-	GMMessageTypeKick            MessageType = "kick"
-	GMMessageTypeKill            MessageType = "kill"
-	GMMessageTypeAuth            MessageType = "auth"
+	GMMessageStart               MessageType = "start"
+	GMMessageNext                MessageType = "next"
+	GMMessageEnd                 MessageType = "end"
+	GMMessageKick                MessageType = "kick"
+	GMMessageKill                MessageType = "kill"
+	GMMessageAuth                MessageType = "auth"
 	GMMessageSummarizeVote       MessageType = "summarize"
 	GMMessageSendState           MessageType = "gsgm"
+	GMMessageShiftTime           MessageType = "timeshift"
 	GMMessageSendStateToEveryone MessageType = "gsGlobal"
 )
 
@@ -39,7 +40,7 @@ const (
 	ServerMessageToken        MessageType = "token"
 	ServerMessageFoundBody    MessageType = "body"
 	ServerMessageVoteReceived MessageType = "voted"
-	ServerMessageNightStarted MessageType = "nightStarted"
+	ServerMessageNightStarted MessageType = "timeShifted"
 	ServerMessageNextRound    MessageType = "nextRound"
 	ServerMessageAwaitVote    MessageType = "waitingForVote"
 	ServerMessageVoteSummary  MessageType = "voteSummary"
@@ -94,4 +95,7 @@ func NewError(message string) ServerMessage {
 		"message": message,
 	}
 	return NewServerMessage(ServerError, msg)
+}
+func CreateStateMessage() ServerMessage {
+	return NewServerMessage(ServerMessageSendState, GlobalRoom.GetState())
 }

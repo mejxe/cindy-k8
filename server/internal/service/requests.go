@@ -103,7 +103,11 @@ func HandleEndGame() {
 	// called when GM requests the game to end
 	EndGame()
 }
-func HandleGameFlow() {
-	// cycle between pause and unpause
+func HandleNextRound() {
+	// start the next round
 	NextRound()
+}
+func HandleShiftTime() {
+	// cycle through night and day
+	ShiftTime()
 }

@@ -1,8 +1,8 @@
 import type { Player } from "./types"
 
 export type WSMessage = {
-  type: string,
-  body: any// TODO: change in the future for hard typed messages somehow
+  type: MessageType,
+  body: string | null// TODO: change in the future for hard typed messages somehow
 }
 // TODO: Create a hard typed message type for each message
 export interface GameStateMessage {
@@ -24,4 +24,21 @@ export interface WSErrorMessage {
     message: string
   }
 }
+export const GMMessageTypes = {
+  Start: "start",
+  NextRound: "next",
+  End: "end",
+  Kick: "kick",
+  Kill: "kill",
+  GetState: "gsgm",
+  ShiftTime: "timeshift"
+} as const
+
+export const ClientMessageTypes = {
+  GetState: "getGS",
+} as const
+
+export type GMMessageType = typeof GMMessageTypes[keyof typeof GMMessageTypes]
+export type ClientMessageType = typeof ClientMessageTypes[keyof typeof ClientMessageTypes]
+export type MessageType = GMMessageType | ClientMessageType
 export type ParsedWSMessage = GameStateMessage | WSErrorMessage

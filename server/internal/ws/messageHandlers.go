@@ -34,16 +34,18 @@ func HandleGMMessages() {
 			service.HandleSendStateToEveryone()
 		case models.GMMessageSummarizeVote:
 			service.HandleVoteSummary(msg)
-		case models.GMMessageTypeStart:
+		case models.GMMessageStart:
 			service.HandleStartGame()
-		case models.GMMessageTypeEnd:
+		case models.GMMessageEnd:
 			service.HandleEndGame()
-		case models.GMMessageTypeNext:
-			service.HandleGameFlow()
+		case models.GMMessageNext:
+			service.HandleNextRound()
+		case models.GMMessageShiftTime:
+			service.HandleShiftTime()
 		}
 	}
 }
-func HandleSending() {
+func HandleBrodcast() {
 	// Send to everyone messages flowing through OutChannel
 	for msgToSend := range room.OutChannel {
 		logging.Info.Printf("Sending %s", msgToSend.String())

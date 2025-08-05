@@ -29,7 +29,7 @@ func main() {
 	fmt.Printf("Server started at localhost%s\n", port)
 	go ws.HandleClientMessages()
 	go ws.HandleGMMessages()
-	go ws.HandleSending()
+	go ws.HandleBrodcast()
 	models.GlobalRoom.Players.Lock()
 	http.Handle("/", http.FileServerFS(reactDir))
 	http.Handle("/create", http.HandlerFunc(api.HandleCreate))

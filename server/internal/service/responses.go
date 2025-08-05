@@ -82,9 +82,9 @@ func SendState(to *models.Player) {
 		models.GlobalRoom.GetState()))
 }
 
+// Sends game state to every connected client
 func SendStateToEveryone() {
-	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageSendState,
-		models.GlobalRoom.GetState())
+	models.GlobalRoom.OutChannel <- models.CreateStateMessage()
 }
 
 // GM
@@ -113,12 +113,16 @@ func NextRound() {
 	if !models.GlobalRoom.GameState.Started {
 		return
 	}
-	if models.GlobalRoom.GameState.Night {
-		models.GlobalRoom.GameState.NextRound()
-		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNextRound, nil)
-	} else {
-		models.GlobalRoom.GameState.NextNight()
-		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
-	}
+	models.GlobalRoom.GameState.NextRound()
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNextRound, nil)
+	SendStateToEveryone()
 
+}
+func ShiftTime() {
+	if !models.GlobalRoom.GameState.Started {
+		return
+	}
+	models.GlobalRoom.GameState.NextTime()
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
+	SendStateToEveryone()
 }

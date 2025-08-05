@@ -20,32 +20,39 @@ type GameState struct {
 }
 
 // gs implementation block
-// methods that set gamestate fields
+
+// reset state and set started = true
 func (g *GameState) StartGame() {
 	g.Started = true
 	g.Round = 0
 	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
 }
-func (g *GameState) NextNight() {
-	if !g.Started || g.Night {
+
+// cycle through night and day
+func (g *GameState) NextTime() {
+	if !g.Started {
 		return
 	}
-	g.Night = true
+	g.Night = !g.Night
 }
 
+// start the next round, update NumPlayersAlive, set daytime
 func (g *GameState) NextRound() {
 	if !g.Started || !g.Night {
 		return
 	}
 	g.Round++
+	g.Night = false
 	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
 }
+
+// end the game
 func (g *GameState) FinishGame(syndicateWins bool) {
+	// TODO: Should return the results
 	g.Started = false
 
 }
 
-// end
 // glob variables export
 var GlobalRoom *Room = &Room{
 	Players:         &Players{Players: make(map[int]*Player)},
