@@ -30,7 +30,6 @@ func main() {
 	go ws.HandleClientMessages()
 	go ws.HandleGMMessages()
 	go ws.HandleBrodcast()
-	models.GlobalRoom.Players.Lock()
 	http.Handle("/", http.FileServerFS(reactDir))
 	http.Handle("/create", http.HandlerFunc(api.HandleCreate))
 	http.Handle("/ws", websocket.Handler(ws.HandleRoom))

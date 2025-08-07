@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&display=swap');
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -21,8 +27,12 @@ body {
   font-family: "Intel One Mono", sans-serif;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 #root {
-  margin: auto;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -94,10 +104,8 @@ main {
 
 
 #lobby {
-  margin-top: 5vh;
   height: auto;
-  width: auto;
-  padding: 50px 100px 150px;
+  width: 100%;
 }
 
 

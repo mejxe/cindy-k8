@@ -35,10 +35,19 @@ export const GMMessageTypes = {
 } as const
 
 export const ClientMessageTypes = {
+  Started: "started",
   GetState: "getGS",
 } as const
+export interface WSStartedMessage {
+  type: "started",
+  body: null
+}
+export interface WSEndedMessage {
+  type: "ended",
+  body: "result"
+}
 
 export type GMMessageType = typeof GMMessageTypes[keyof typeof GMMessageTypes]
 export type ClientMessageType = typeof ClientMessageTypes[keyof typeof ClientMessageTypes]
 export type MessageType = GMMessageType | ClientMessageType
-export type ParsedWSMessage = GameStateMessage | WSErrorMessage
+export type ParsedWSMessage = GameStateMessage | WSErrorMessage | WSStartedMessage | WSEndedMessage

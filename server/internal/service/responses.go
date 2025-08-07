@@ -108,6 +108,7 @@ func EndGame() {
 	var summary map[string]any = nil              // TODO: Add game summary and send to players
 	models.GlobalRoom.GameState.FinishGame(false) // TODO: Change that
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageEnd, summary)
+	models.GlobalRoom.CloseConnections()
 }
 func NextRound() {
 	if !models.GlobalRoom.GameState.Started {

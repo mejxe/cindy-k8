@@ -2,7 +2,7 @@ import type { Player } from "../../types/types";
 import "../../styles/player.css"
 
 export default function PlayerList({ players }: { players: Player[] }) {
-  return (<div><h1>Player List</h1>
+  return (<div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}><h1>Player List</h1>
     < ul id="players">
       {players.map((p) => {
         return Player(p)

@@ -13,7 +13,8 @@ export const defaultState: AppStateType = {
   numPlayersAlive: 0,
   night: false,
   started: false,
-  holdingMic: null
+  holdingMic: null,
+  voting: false,
 }
 export type Player = {
   id: number,
@@ -24,11 +25,12 @@ export type Player = {
   syndicate: boolean
 }
 export type AppStateType = {
+  started: boolean,
   players: Player[],
   round: number,
   numPlayersAlive: number,
   night: boolean,
-  started: boolean,
+  voting: boolean
   holdingMic: Player | null,
 }
 export type StateKeys = typeof States[keyof typeof States]

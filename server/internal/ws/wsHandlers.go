@@ -98,4 +98,5 @@ func HandleRoom(ws *websocket.Conn) {
 		models.GlobalRoom.ClientInChannel <- clientMsg
 
 	}
+	logging.Warning.Printf("Player #%d %s %s disconnected\n", identity.Id, identity.FirstName, identity.LastName)
 }

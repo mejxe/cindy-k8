@@ -1,33 +1,36 @@
 ul#players {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 5vh;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 3rem;
   padding: 0;
-}
-
-.player img {
+  max-width: 1000px;
+  margin: auto;
+  margin-top: 10vh;
   width: 100%;
-  margin-bottom: 10px;
+  justify-items: center;
 }
 
 .player {
-  width: 10vw;
-  height: auto;
+  background: linear-gradient(145deg, #2a2520 0%, #242424 50%, #1f1f1f 100%);
+  border: 2px solid #504B38;
+  border-radius: 15px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+  min-height: 160px;
+  min-width: 100px;
+  max-width: 220px;
   display: flex;
   flex-direction: column;
-  border: 3px solid #504B38;
-  border-radius: 20px;
-  padding: 20px;
-  min-width: 120px;
-  min-height: 200px;
-  background: linear-gradient(145deg, #2a2520 0%, #242424 50%, #1f1f1f 100%);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  list-style: none;
   box-shadow:
     0 4px 15px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-  position: relative;
   overflow: hidden;
 }
 
@@ -42,7 +45,7 @@ ul#players {
 }
 
 .player:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.4),
     0 0 20px rgba(212, 175, 55, 0.1),
@@ -50,41 +53,57 @@ ul#players {
   border-color: rgba(212, 175, 55, 0.4);
 }
 
+.player-avatar {
+  position: relative;
+  margin-bottom: 0.5rem;
+  width: 50px;
+  height: 50px;
+}
+
+.avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #504B38, #d4af37);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #000;
+  text-transform: uppercase;
+}
+
+.citizenName {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  gap: 0.5rem;
+  text-align: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.player h3 {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  margin: 0;
+  text-align: center;
+  text-transform: capitalize;
+  font-weight: 700;
+}
 
 .player h4 {
-  font-size: clamp(1rem, 1.2vw, 1.3rem);
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
   margin: 0;
   text-align: center;
   text-transform: capitalize;
   color: rgba(212, 175, 55, 0.8);
   font-weight: 600;
   font-style: italic;
-}
-
-#syndicate {
-  color: darkred;
-}
-
-.player h3 {
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1rem;
-  font-size: clamp(1.2rem, 1.3vw, 1.5rem);
-  margin: 0;
-  text-align: center;
-  text-transform: capitalize;
-  font-weight: 800;
-}
-
-.player .citizenName {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  gap: 10px;
-  text-align: center;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
 }
 
 .player h2 {
@@ -132,6 +151,9 @@ ul#players {
   padding-top: 1rem;
 }
 
+#syndicate {
+  color: darkred;
+}
 
 .player.dead {
   opacity: 0.5;
@@ -183,13 +205,25 @@ ul#players {
   opacity: 0.3;
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  ul#players {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.8rem;
+  }
 
-@media (max-width: 480px) {
   .player {
-    min-width: 110px;
-    min-height: 160px;
-    border-width: 2px;
-    padding: 15px;
+    min-height: 120px;
+    padding: 0.8rem;
+  }
+
+  .player-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .avatar-circle {
+    font-size: 1rem;
   }
 
   .player button {
@@ -197,8 +231,55 @@ ul#players {
     font-size: 0.8rem;
     margin: 0 0.2rem;
   }
+}
 
+/* Landscape mobile optimizations */
+@media (max-width: 896px) and (orientation: landscape) {
   ul#players {
-    gap: 1vh;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+
+  .player {
+    min-height: 100px;
+    padding: 0.5rem;
+  }
+
+  .player-avatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  .avatar-circle {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  ul#players {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 2rem 1rem;
+  }
+
+  .player {
+    min-width: 90px;
+    min-height: 120px;
+    border-width: 2px;
+    padding: 0.5rem;
+  }
+
+  .player-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .avatar-circle {
+    font-size: 0.8rem;
+  }
+
+  .player button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    margin: 0 0.2rem;
   }
 }

@@ -50,6 +50,9 @@ func (g *GameState) NextRound() {
 func (g *GameState) FinishGame(syndicateWins bool) {
 	// TODO: Should return the results
 	g.Started = false
+	g.Night = false
+	g.Round = 0
+	g.NumPlayersAlive = 0
 
 }
 

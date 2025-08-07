@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"fmt"
 	"strconv"
+
+	"github.com/mejxe/cindy-k8/internal/logging"
 )
 
 // PLAYER HELPER METHODS
@@ -103,4 +105,16 @@ func (r *Room) GetStateGM() map[string]any {
 func generateMD5(pass string) []byte {
 	hash := md5.Sum([]byte(pass))
 	return hash[:]
+}
+
+func (room *Room) CloseConnections() {
+	room.Players.Mutex.Lock()
+	defer room.Players.Mutex.Unlock()
+	for _, p := range room.Players.Players {
+		p.Connection.Close()
+	}
+	room.Players.Players = nil
+	room.Players.Players = make(map[int]*Player)
+	logging.Warning.Println("Game ended, disconnecting players....")
+	logging.Info.Printf("Players cleared: 'Players: %x'", room.Players.Players)
 }

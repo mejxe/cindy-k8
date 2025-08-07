@@ -1,4 +1,4 @@
-import { GMMessageTypes, type WSMessage } from "../../types/messageTypes";
+import { GMMessageTypes, type GMMessageType, type WSMessage } from "../../types/messageTypes";
 import type { AppStateType } from "../../types/types";
 import "./GameState.css"
 
@@ -72,8 +72,8 @@ function getControlState(state: AppStateType) {
       }
     },
     roundControl: {
-      disabled: state.started || state.night,
-      className: (!state.started || state.night) ? "control-group" : "control-group disabled"
+      disabled: state.started && state.night,
+      className: (state.started && state.night) ? "control-group" : "control-group disabled"
     },
     timeControl: {
       disabled: !state.started,

@@ -1,5 +1,5 @@
 import type { Dispatch } from "react";
-import { connectWSForGM } from "../../services/ws";
+import { connectWSForGM } from "../../services/GMWS.ts";
 import type { AppStateType } from "../../types/types";
 
 export default function Login({ setVerified, setWS, setGameState }: { setVerified: Dispatch<boolean>, setWS: Dispatch<WebSocket | null>, setGameState: Dispatch<AppStateType> }) {
