@@ -12,7 +12,7 @@ export default function PlayerList({ players }: { players: Player[] }) {
 }
 function Player(player: Player) {
   return (
-    <li className={player.alive ? "player" : "player dead"}>
+    <li className={`${player.connected ? "" : "disconnected"} ${player.alive ? "player" : "player dead"}`}>
       <h2>{player.id}</h2>
       <div className="citizenName">
         <h3>{player.firstName}</h3>

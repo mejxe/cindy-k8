@@ -54,17 +54,23 @@ func HandleBrodcast() {
 		jsonMsg, _ := json.Marshal(msgToSend)
 
 		// the state updates
-		stateMsg, _ := json.Marshal(models.NewServerMessage(models.ServerMessageSendState, room.GetState()))
+		//	stateMsg, _ := json.Marshal(models.NewServerMessage(models.ServerMessageSendState, room.GetState()))
 		GMstateMsg, _ := json.Marshal(models.NewServerMessage(models.ServerMessageSendState, room.GetStateGM()))
 
 		// send to gm
-		room.GameMaster.Connection.Write(jsonMsg)
-		room.GameMaster.Connection.Write(GMstateMsg)
+		if room.GameMaster.Connected {
+			room.GameMaster.Connection.Write(jsonMsg)
+			room.GameMaster.Connection.Write(GMstateMsg)
+		}
 
 		// send to players
 		for _, p := range players.Players {
+			if p.Connection == nil { // skip disconnected users
+				continue
+			}
+
 			p.Connection.Write(jsonMsg)
-			p.Connection.Write(stateMsg)
+			//		p.Connection.Write(stateMsg)
 		}
 	}
 }

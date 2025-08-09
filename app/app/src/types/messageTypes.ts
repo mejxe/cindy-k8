@@ -10,7 +10,7 @@ export interface GameStateMessage {
   body: GameStateBody,
 }
 export interface GameStateBody {
-  players: Record<string, Player>,
+  players: [Player],
   gameState: {
     round: number,
     numPlayersAlive: number,
@@ -46,8 +46,20 @@ export interface WSEndedMessage {
   type: "ended",
   body: "result"
 }
+export interface WSPlayerInfo {
+  type: "playerInfo",
+  body: PlayerConnectedBody | PlayerDisconnectedBody
+}
+interface PlayerConnectedBody {
+  action: "connected",
+  players: [Player]
+}
+interface PlayerDisconnectedBody {
+  action: "disconnected",
+  player: number // player id
+}
 
 export type GMMessageType = typeof GMMessageTypes[keyof typeof GMMessageTypes]
 export type ClientMessageType = typeof ClientMessageTypes[keyof typeof ClientMessageTypes]
 export type MessageType = GMMessageType | ClientMessageType
-export type ParsedWSMessage = GameStateMessage | WSErrorMessage | WSStartedMessage | WSEndedMessage
+export type ParsedWSMessage = GameStateMessage | WSErrorMessage | WSStartedMessage | WSEndedMessage | WSPlayerInfo

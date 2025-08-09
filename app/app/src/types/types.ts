@@ -7,7 +7,7 @@ export const States = {
   Results: "results",
 } as const
 
-export const defaultState: AppStateType = {
+export const defaultState: GameState = {
   players: [],
   round: 0,
   numPlayersAlive: 0,
@@ -23,8 +23,9 @@ export type Player = {
   occupation: string,
   alive: boolean
   syndicate: boolean
+  connected: boolean
 }
-export type AppStateType = {
+export type GameState = {
   started: boolean,
   players: Player[],
   round: number,

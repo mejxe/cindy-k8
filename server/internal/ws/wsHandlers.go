@@ -72,11 +72,18 @@ func HandleRoom(ws *websocket.Conn) {
 		json.NewEncoder(ws).Encode(models.NewError("Invalid token for this session."))
 		return
 	}
+
 	identity.Connection = ws
 
 	// send identity data and room data to display characters
 	models.GlobalRoom.ClientInChannel <- models.NewClientMessage(models.ClientMessageGetState, identity, nil) // send get state request
-	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendState}
+
+	// notify already connected players about new join
+	body := map[string]any{
+		"action":  "connected",
+		"players": room.Players.Array(),
+	}
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessagePlayerInfo, body)
 
 	buf := make([]byte, 1024)
 	for {
@@ -95,8 +102,17 @@ func HandleRoom(ws *websocket.Conn) {
 			continue
 		}
 
+		clientMsg.Author = identity
+
 		models.GlobalRoom.ClientInChannel <- clientMsg
 
 	}
+	identity.Connection = nil
 	logging.Warning.Printf("Player #%d %s %s disconnected\n", identity.Id, identity.FirstName, identity.LastName)
+
+	body = map[string]any{
+		"player": identity.Id,
+		"action": "disconnected",
+	}
+	room.OutChannel <- models.NewServerMessage(models.ServerMessagePlayerInfo, body)
 }

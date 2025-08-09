@@ -20,7 +20,7 @@ export default function GMPanel() {
       }
       case false: {
         return (<>
-          <Login setVerified={setVerified} setWS={setWS} setGameState={setGameState} />
+          <Login setVerified={setVerified} setWS={setWS} setGameState={setGameState} gameState={gameState} />
         </>)
       }
     }

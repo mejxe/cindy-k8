@@ -45,6 +45,7 @@ const (
 	ServerMessageAwaitVote    MessageType = "waitingForVote"
 	ServerMessageVoteSummary  MessageType = "voteSummary"
 	ServerMessageSendState    MessageType = "gameState"
+	ServerMessagePlayerInfo   MessageType = "playerInfo"
 	ServerError               MessageType = "error"
 )
 

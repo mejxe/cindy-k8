@@ -3,7 +3,6 @@ package models
 import (
 	"crypto/md5"
 	"fmt"
-	"strconv"
 
 	"github.com/mejxe/cindy-k8/internal/logging"
 )
@@ -17,17 +16,18 @@ func (p *Player) String() string {
 toMap()
 redacted - redact isSyndicate value
 */
-func (p *Player) Map() map[string]string {
-	tmap := make(map[string]string)
-	tmap["id"] = strconv.Itoa(p.Id)
+func (p *Player) Map() map[string]any {
+	tmap := make(map[string]any)
+	tmap["id"] = p.Id
 	tmap["firstName"] = p.FirstName
 	tmap["lastName"] = p.LastName
 	tmap["occupation"] = p.Occupation
-	tmap["alive"] = strconv.FormatBool(p.Alive)
+	tmap["alive"] = p.Alive
+	tmap["connected"] = p.Connection != nil
 	return tmap
 }
-func (p *Player) UpgradeMap(pmap map[string]string) map[string]string {
-	pmap["syndicate"] = strconv.FormatBool(p.Syndicate)
+func (p *Player) UpgradeMap(pmap map[string]any) map[string]any {
+	pmap["syndicate"] = p.Syndicate
 	return pmap
 }
 
@@ -43,19 +43,34 @@ func (ps *Players) String() string {
 }
 
 // toMap() for client formatted state
-func (ps *Players) Map() map[string]map[string]string {
-	playersMap := make(map[string]map[string]string)
+func (ps *Players) Map() map[string]map[string]any {
+	playersMap := make(map[string]map[string]any)
 	for i, p := range ps.Players {
 		playersMap[fmt.Sprintf("player #%d", i)] = p.Map()
 	}
 	return playersMap
 }
-func (ps *Players) GMMap() map[string]map[string]string {
-	playersMap := make(map[string]map[string]string)
+func (ps *Players) Array() []map[string]any {
+	playersArray := make([]map[string]any, len(ps.Players))
+	for i, p := range ps.Players {
+		playersArray[i] = p.Map()
+	}
+	return playersArray
+
+}
+func (ps *Players) GMMap() map[string]map[string]any {
+	playersMap := make(map[string]map[string]any)
 	for i, p := range ps.Players {
 		playersMap[fmt.Sprintf("player #%d", i)] = p.UpgradeMap(p.Map())
 	}
 	return playersMap
+}
+func (ps *Players) GMArray() []map[string]any {
+	playersArray := make([]map[string]any, len(ps.Players))
+	for i, p := range ps.Players {
+		playersArray[i] = p.Map()
+	}
+	return playersArray
 }
 
 // END
@@ -91,13 +106,13 @@ func NewGM(password string) *GameMaster {
 }
 func (r *Room) GetState() map[string]any {
 	return map[string]any{
-		"players":   r.Players.Map(),
+		"players":   r.Players.Array(),
 		"gameState": r.GameState.Map(),
 	}
 }
 func (r *Room) GetStateGM() map[string]any {
 	return map[string]any{
-		"players":   r.Players.GMMap(),
+		"players":   r.Players.GMArray(),
 		"gameState": r.GameState.Map(),
 	}
 }

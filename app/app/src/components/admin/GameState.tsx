@@ -1,8 +1,8 @@
 import { GMMessageTypes, type GMMessageType, type WSMessage } from "../../types/messageTypes";
-import type { AppStateType } from "../../types/types";
+import type { GameState } from "../../types/types";
 import "./GameState.css"
 
-export default function GameState({ gamestate, ws }: { gamestate: AppStateType, ws: WebSocket }) {
+export default function GameState({ gamestate, ws }: { gamestate: GameState, ws: WebSocket }) {
   const night = gamestate.night ? "Nighttime" : "Daytime"
   const started = gamestate.started ? "started" : "Not started"
   const controls = getControlState(gamestate)
@@ -61,7 +61,7 @@ function sendRequest(ws: WebSocket, type: GMMessageType, body: string | null) {
   const msg: WSMessage = { type, body }
   ws.send(JSON.stringify(msg))
 }
-function getControlState(state: AppStateType) {
+function getControlState(state: GameState) {
   // TODO: add class names for each
   return {
     startControl: {

@@ -1,5 +1,5 @@
-import { ClientMessageTypes, type GameStateBody, type ParsedWSMessage } from "../types/messageTypes"
-import type { AppStateType, Player } from "../types/types"
+import { ClientMessageTypes, type GameStateBody, type ParsedWSMessage, type WSPlayerInfo } from "../types/messageTypes"
+import type { GameState } from "../types/types"
 
 // TODO: Maybe make different parser for gm
 export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
@@ -27,6 +27,9 @@ export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
           body: { message: message.body.mesage }
         }
       }
+      case "playerInfo": {
+        return message as WSPlayerInfo
+      }
       case "ended": {
         return {
           type: "ended",
@@ -41,9 +44,9 @@ export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
     return null
   }
 }
-export function updateGameState(receivedGameState: GameStateBody, forGM: boolean): AppStateType {
-  const updatedGameState: AppStateType = {
-    players: [],
+export function updateGameState(receivedGameState: GameStateBody, forGM: boolean): GameState {
+  const updatedGameState: GameState = {
+    players: receivedGameState.players,
     round: receivedGameState.gameState.round,
     numPlayersAlive: receivedGameState.gameState.numPlayersAlive,
     night: receivedGameState.gameState.night,
@@ -51,17 +54,10 @@ export function updateGameState(receivedGameState: GameStateBody, forGM: boolean
     holdingMic: null,
     voting: false
   }
-  const newPlayers: Player[] = Object.values(receivedGameState.players)
-  newPlayers.forEach((p) => {
-    const player: Player = {
-      id: p.id,
-      firstName: p.firstName,
-      lastName: p.lastName,
-      occupation: p.occupation,
-      alive: p.alive,
-      syndicate: forGM ? p.syndicate : false
-    }
-    updatedGameState.players.push(player)
-  })
+  if (!forGM) {
+    updatedGameState.players.forEach((p) => {
+      p.syndicate = false
+    })
+  }
   return updatedGameState
 }

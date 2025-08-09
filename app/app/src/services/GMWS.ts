@@ -1,9 +1,10 @@
 import type { ParsedWSMessage } from "../types/messageTypes"
 import { parseWSMessages } from "./shared.ts"
 import { updateGameState } from "./shared"
+import type { GameState } from "../types/types.ts"
 
 
-export function connectWSForGM(password: string, setVerified, setWS, setGameState) {
+export function connectWSForGM(password: string, setVerified, setWS, setGameState, gameState) {
   const ws = new WebSocket(`http://localhost:8080/gm?password=${password}`)
   ws.onopen = () => {
     console.log("Ws connected.")
@@ -17,7 +18,7 @@ export function connectWSForGM(password: string, setVerified, setWS, setGameStat
       if (msg === null) {
         return
       }
-      handleGMMessages(msg, setGameState)
+      handleGMMessages(msg, setGameState, gameState)
     } catch (e) {
       console.error(e)
     }
@@ -28,7 +29,7 @@ export function connectWSForGM(password: string, setVerified, setWS, setGameStat
     setVerified(false)
   }
 }
-function handleGMMessages(message: ParsedWSMessage, setGameState) {
+function handleGMMessages(message: ParsedWSMessage, setGameState, gameState: GameState) {
   switch (message.type) {
     case "gameState": {
       const receivedGameState = message.body
@@ -41,6 +42,26 @@ function handleGMMessages(message: ParsedWSMessage, setGameState) {
       setGameState(newgs)
       break
     }
-    case "error":
+    case "error": break
+    case "playerInfo": {
+      switch (message.body.action) {
+        case "connected": {
+          gameState.players = message.body.players
+          setGameState(gameState)
+          break
+        }
+        case "disconnected": {
+          const player = gameState.players.at(message.body.player)
+          if (player === undefined) {
+            console.log("Disconnected handler: Player is null")
+            return
+          }
+          player.connected = false
+          setGameState(gameState)
+        }
+
+      }
+      break
+    }
   }
 }
