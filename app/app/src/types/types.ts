@@ -16,6 +16,11 @@ export const defaultState: GameState = {
   holdingMic: null,
   voting: false,
 }
+export const defaultGameInfo: GameInfo = {
+  gameState: defaultState,
+  me: null
+}
+
 export type Player = {
   id: number,
   firstName: string,
@@ -33,5 +38,9 @@ export type GameState = {
   night: boolean,
   voting: boolean
   holdingMic: Player | null,
+}
+export type GameInfo = {
+  gameState: GameState,
+  me: Player | null
 }
 export type StateKeys = typeof States[keyof typeof States]

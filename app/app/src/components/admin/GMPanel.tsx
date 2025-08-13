@@ -14,7 +14,7 @@ export default function GMPanel() {
       case true: {
         if (ws === null) { return }
         return (<div>
-          <PlayerList players={gameState.players} />
+          <PlayerList ws={ws} state={gameState} />
           <GameState ws={ws} gamestate={gameState} />
         </div>)
       }

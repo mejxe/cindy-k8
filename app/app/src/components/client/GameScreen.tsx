@@ -13,15 +13,15 @@ export default function GameScreen() {
 
 
   const getPhaseText = () => {
-    switch (state.night) {
-      case true: return `🌙 Night ${state.round}`;
-      case false: return `☀️ Day ${state.round}`;
+    switch (state.gameState.night) {
+      case true: return `🌙 Night ${state.gameState.round}`;
+      case false: return `☀️ Day ${state.gameState.round}`;
       default: return "Game in progress...";
     }
   };
 
   const getPhaseColor = () => {
-    switch (state.night) {
+    switch (state.gameState.night) {
       case true: return "#4a5568";
       case false: return "#d4af37";
       default: return "#d4af37";
@@ -39,7 +39,7 @@ export default function GameScreen() {
 
     <div className="game-content">
       <ul id="players">
-        {state.players.map((player) => {
+        {state.gameState.players.map((player) => {
           return ClientPlayer(player)
         })}
       </ul>

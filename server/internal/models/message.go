@@ -3,6 +3,7 @@ package models
 import "fmt"
 
 type MessageType string
+type GMManipulateAction string
 
 // defined messages that have to match the frontend
 // app flow:
@@ -21,13 +22,18 @@ const (
 	GMMessageStart               MessageType = "start"
 	GMMessageNext                MessageType = "next"
 	GMMessageEnd                 MessageType = "end"
-	GMMessageKick                MessageType = "kick"
-	GMMessageKill                MessageType = "kill"
+	GMMessageManipulatePlayer    MessageType = "manipulate"
 	GMMessageAuth                MessageType = "auth"
 	GMMessageSummarizeVote       MessageType = "summarize"
 	GMMessageSendState           MessageType = "gsgm"
 	GMMessageShiftTime           MessageType = "timeshift"
 	GMMessageSendStateToEveryone MessageType = "gsGlobal"
+)
+
+// GM Manipulate Actions
+const (
+	Kill GMManipulateAction = "kill"
+	Kick GMManipulateAction = "kick"
 )
 
 // Server Message Types
@@ -46,6 +52,8 @@ const (
 	ServerMessageVoteSummary  MessageType = "voteSummary"
 	ServerMessageSendState    MessageType = "gameState"
 	ServerMessagePlayerInfo   MessageType = "playerInfo"
+	ServerMessageKicked       MessageType = "kicked"
+	ServerMessageIdentity     MessageType = "id"
 	ServerError               MessageType = "error"
 )
 

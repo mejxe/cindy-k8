@@ -219,7 +219,9 @@
 }
 
 .control-btn:disabled,
-.control-btn.disabled {
+.control-btn.disabled,
+button.disabled,
+button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     color: rgba(255, 255, 255, 0.3);
@@ -227,10 +229,13 @@
     background: rgba(0, 0, 0, 0.2);
     transform: none;
     box-shadow: none;
+    pointer-events: none;
 }
 
 .control-btn:disabled:hover,
-.control-btn.disabled:hover {
+.control-btn.disabled:hover,
+button.disabled:hover,
+button:disabled:hover {
     border-color: rgba(80, 75, 56, 0.3);
     color: rgba(255, 255, 255, 0.3);
     transform: none;

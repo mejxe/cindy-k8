@@ -39,10 +39,11 @@ func HandleGmConnection(ws *websocket.Conn) {
 		}
 
 		msg := buf[:n]
-		logging.Info.Printf("Received: %s\n", string(msg))
+		logging.Info.Printf("GM Channel in: %s\n", string(msg))
 		var gmMsg models.GMMessage
 
 		if json.Unmarshal(msg, &gmMsg) != nil {
+			logging.Error.Println("GM Channel in: cannot parse the message!")
 			continue
 		}
 		models.GlobalRoom.GMInChannel <- gmMsg
@@ -75,7 +76,10 @@ func HandleRoom(ws *websocket.Conn) {
 
 	identity.Connection = ws
 
-	// send identity data and room data to display characters
+	// send player identity and store it in the frontend
+	json.NewEncoder(identity.Connection).
+		Encode(models.NewServerMessage(models.ServerMessageIdentity, identity.UpgradeMap(identity.Map())))
+
 	models.GlobalRoom.ClientInChannel <- models.NewClientMessage(models.ClientMessageGetState, identity, nil) // send get state request
 
 	// notify already connected players about new join

@@ -3,8 +3,6 @@ package models
 import (
 	"crypto/md5"
 	"fmt"
-
-	"github.com/mejxe/cindy-k8/internal/logging"
 )
 
 // PLAYER HELPER METHODS
@@ -51,9 +49,10 @@ func (ps *Players) Map() map[string]map[string]any {
 	return playersMap
 }
 func (ps *Players) Array() []map[string]any {
-	playersArray := make([]map[string]any, len(ps.Players))
-	for i, p := range ps.Players {
-		playersArray[i] = p.Map()
+	// TODO: FIX THE RANDOM NULL WHILE PLAYER JOINS
+	playersArray := make([]map[string]any, 0, len(ps.Players))
+	for _, p := range ps.Players {
+		playersArray = append(playersArray, p.Map())
 	}
 	return playersArray
 
@@ -66,9 +65,9 @@ func (ps *Players) GMMap() map[string]map[string]any {
 	return playersMap
 }
 func (ps *Players) GMArray() []map[string]any {
-	playersArray := make([]map[string]any, len(ps.Players))
-	for i, p := range ps.Players {
-		playersArray[i] = p.Map()
+	playersArray := make([]map[string]any, 0, len(ps.Players))
+	for _, p := range ps.Players {
+		playersArray = append(playersArray, p.UpgradeMap(p.Map()))
 	}
 	return playersArray
 }
@@ -122,14 +121,10 @@ func generateMD5(pass string) []byte {
 	return hash[:]
 }
 
-func (room *Room) CloseConnections() {
-	room.Players.Mutex.Lock()
-	defer room.Players.Mutex.Unlock()
-	for _, p := range room.Players.Players {
-		p.Connection.Close()
+func (s *GameSummary) Map() map[string]any {
+	return map[string]any{
+		"playersLeft":   s.PlayersLeft,
+		"syndicateWins": s.SyndicateWins,
+		"syndicate":     s.SyndicateIDs,
 	}
-	room.Players.Players = nil
-	room.Players.Players = make(map[int]*Player)
-	logging.Warning.Println("Game ended, disconnecting players....")
-	logging.Info.Printf("Players cleared: 'Players: %x'", room.Players.Players)
 }

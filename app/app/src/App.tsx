@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
-import { defaultState, States, type GameState, type StateKeys } from './types/types'
+import { defaultState, States, type GameInfo, type GameState, type Player, type StateKeys } from './types/types'
 import { AttachClientMessageHandler, connectWS } from './services/ClientWS.ts'
 import { AppContext } from './store/gamestate-context'
 import CharacterForm from './components/client/CharacterForm'
 import Lobby from './components/client/Lobby'
 import Header from './components/client/Header'
 import GameScreen from './components/client/GameScreen'
+import { Toaster } from 'react-hot-toast'
 
 export default function App() {
 
@@ -15,6 +16,8 @@ export default function App() {
   const websocket = useRef<WebSocket | null>(null)
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
   const [gameState, setGameState] = useState<GameState>(defaultState)
+  const [me, SetMe] = useState<Player | null>(null)
+  const gameInfo: GameInfo = { gameState, me }
 
   useEffect(() => {
     if (token === null) {
@@ -23,7 +26,7 @@ export default function App() {
     }
     websocket.current = connectWS(token, setToken)
     console.log("WEBSOCKET CURRENT: ", websocket.current)
-    AttachClientMessageHandler(websocket, setAppState, setToken, setGameState)
+    AttachClientMessageHandler(websocket, setAppState, setToken, setGameState, SetMe)
     localStorage.setItem("token", token)
   }, [token])
 
@@ -38,7 +41,8 @@ export default function App() {
   }
 
   return (<>
-    <AppContext.Provider value={gameState}>
+    <AppContext.Provider value={gameInfo}>
+      <Toaster position='bottom-right' />
       {toRender()}
     </AppContext.Provider>
   </>)

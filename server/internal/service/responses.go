@@ -2,7 +2,9 @@ package service
 
 import (
 	"encoding/json"
+	"time"
 
+	"github.com/mejxe/cindy-k8/internal/logging"
 	"github.com/mejxe/cindy-k8/internal/models"
 )
 
@@ -101,13 +103,18 @@ func StartGame() {
 	models.GlobalRoom.GameState.StartGame()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageStart, nil)
 }
-func EndGame() {
+func EndGame(msg models.GMMessage) {
 	if !models.GlobalRoom.GameState.Started {
 		return
 	}
-	var summary map[string]any = nil              // TODO: Add game summary and send to players
-	models.GlobalRoom.GameState.FinishGame(false) // TODO: Change that
-	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageEnd, summary)
+	var summary models.GameSummary
+	if syndicateWins, ok := msg.Body["syndicateWins"]; ok {
+		summary = models.GlobalRoom.GameState.FinishGame(syndicateWins.(bool))
+	} else {
+		models.GlobalRoom.GameState.FinishGame(false) // default when the game is ended early
+	}
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageEnd, summary.Map())
+	time.Sleep(100 * time.Millisecond)
 	models.GlobalRoom.CloseConnections()
 }
 func NextRound() {
@@ -126,4 +133,32 @@ func ShiftTime() {
 	models.GlobalRoom.GameState.NextTime()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
 	SendStateToEveryone()
+}
+func KickPlayer(player *models.Player) {
+	models.GlobalRoom.Players.Lock()
+	defer models.GlobalRoom.Players.Unlock()
+
+	message := map[string]any{
+		"who": player.Id,
+	}
+
+	json.NewEncoder(player.Connection).Encode(models.NewServerMessage(models.ServerMessageKicked, message))
+
+	player.Connection.Close()
+	delete(models.GlobalRoom.Players.Players, player.Id)
+
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageKicked, message)
+}
+func KillPlayer(player *models.Player) {
+	models.GlobalRoom.Players.Lock()
+
+	player.Alive = false
+	message := map[string]any{
+		"whoDied": player.Id,
+	}
+	models.GlobalRoom.Players.Unlock()
+
+	logging.Success.Println("Killed a player!")
+
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessagePKilled, message)
 }

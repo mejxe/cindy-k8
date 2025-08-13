@@ -1,4 +1,4 @@
 import { createContext } from "react";
-import { defaultState, type GameState } from "../types/types";
+import { defaultGameInfo, type GameInfo } from "../types/types";
 
-export const AppContext = createContext<GameState>(defaultState)
+export const AppContext = createContext<GameInfo>(defaultGameInfo)

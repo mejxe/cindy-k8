@@ -27,6 +27,7 @@ func HandleClientMessages() {
 // handles GMInChannel where structured GM messages come through and calls methods
 func HandleGMMessages() {
 	for msg := range models.GlobalRoom.GMInChannel {
+		logging.Info.Printf("Handling message: %s", msg.Type)
 		switch msg.Type {
 		case models.GMMessageSendState:
 			service.HandleSendGMState()
@@ -34,10 +35,12 @@ func HandleGMMessages() {
 			service.HandleSendStateToEveryone()
 		case models.GMMessageSummarizeVote:
 			service.HandleVoteSummary(msg)
+		case models.GMMessageManipulatePlayer:
+			service.HandleManipulate(msg)
 		case models.GMMessageStart:
 			service.HandleStartGame()
 		case models.GMMessageEnd:
-			service.HandleEndGame()
+			service.HandleEndGame(msg)
 		case models.GMMessageNext:
 			service.HandleNextRound()
 		case models.GMMessageShiftTime:
@@ -64,6 +67,8 @@ func HandleBrodcast() {
 		}
 
 		// send to players
+		players.Lock()
+		logging.Warning.Println("Locking players in brodcast.")
 		for _, p := range players.Players {
 			if p.Connection == nil { // skip disconnected users
 				continue
@@ -72,5 +77,7 @@ func HandleBrodcast() {
 			p.Connection.Write(jsonMsg)
 			//		p.Connection.Write(stateMsg)
 		}
+		players.Unlock()
+		logging.Warning.Println("Unlocked players in brodcast.")
 	}
 }

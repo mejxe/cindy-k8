@@ -15,6 +15,10 @@ func HandleCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", 403)
 		return
 	}
+	if models.GlobalRoom.GameState.Started {
+		http.Error(w, "Game has already started", 403)
+		return
+	}
 	r.ParseForm()
 
 	if len(r.Form.Get("firstName")) == 0 || len(r.Form.Get("lastName")) == 0 || len(r.Form.Get("occupation")) == 0 {

@@ -28,8 +28,7 @@ export const GMMessageTypes = {
   Start: "start",
   NextRound: "next",
   End: "end",
-  Kick: "kick",
-  Kill: "kill",
+  Manipualte: "manipulate",
   GetState: "gsgm",
   ShiftTime: "timeshift"
 } as const
@@ -50,6 +49,18 @@ export interface WSPlayerInfo {
   type: "playerInfo",
   body: PlayerConnectedBody | PlayerDisconnectedBody
 }
+export interface WSPlayerEliminated {
+  type: "pkilled",
+  body: { "whoDied": number }
+}
+export interface WSPlayerKicked {
+  type: "kicked",
+  body: { "who": number }
+}
+export interface WSPlayerID {
+  type: "id",
+  body: { id: number, alive: boolean, connected: boolean, firstName: string, lastName: string, occupation: string, syndicate: boolean }
+}
 interface PlayerConnectedBody {
   action: "connected",
   players: [Player]
@@ -62,4 +73,5 @@ interface PlayerDisconnectedBody {
 export type GMMessageType = typeof GMMessageTypes[keyof typeof GMMessageTypes]
 export type ClientMessageType = typeof ClientMessageTypes[keyof typeof ClientMessageTypes]
 export type MessageType = GMMessageType | ClientMessageType
-export type ParsedWSMessage = GameStateMessage | WSErrorMessage | WSStartedMessage | WSEndedMessage | WSPlayerInfo
+export type ParsedWSMessage = GameStateMessage | WSErrorMessage |
+  WSStartedMessage | WSEndedMessage | WSPlayerInfo | WSPlayerEliminated | WSPlayerKicked | WSPlayerID

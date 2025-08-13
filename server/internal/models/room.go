@@ -1,5 +1,7 @@
 package models
 
+import "github.com/mejxe/cindy-k8/internal/logging"
+
 type Room struct {
 	Players         *Players
 	GameMaster      *GameMaster // one game master per game, connected to separate ws
@@ -9,51 +11,21 @@ type Room struct {
 	OutChannel      chan ServerMessage // server responds through here
 }
 
-type GameState struct {
-	Round           int
-	NumPlayersAlive int
-	Night           bool // is it night?
-	Started         bool
-	HoldingMic      *Player
-	RoundsBody      *DeadBody
-	CurrentVote     *Vote
-}
-
-// gs implementation block
-
-// reset state and set started = true
-func (g *GameState) StartGame() {
-	g.Started = true
-	g.Round = 0
-	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
-}
-
-// cycle through night and day
-func (g *GameState) NextTime() {
-	if !g.Started {
-		return
+func (room *Room) CloseConnections() {
+	room.Players.Mutex.Lock()
+	logging.Warning.Println("Locking players in closeConn")
+	defer logging.Warning.Println("Unlocked players in closeConn.")
+	defer room.Players.Mutex.Unlock()
+	for _, p := range room.Players.Players {
+		// kick out players that didn't disconnect
+		if p.Connection != nil {
+			p.Connection.Close()
+		}
 	}
-	g.Night = !g.Night
-}
-
-// start the next round, update NumPlayersAlive, set daytime
-func (g *GameState) NextRound() {
-	if !g.Started || !g.Night {
-		return
-	}
-	g.Round++
-	g.Night = false
-	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
-}
-
-// end the game
-func (g *GameState) FinishGame(syndicateWins bool) {
-	// TODO: Should return the results
-	g.Started = false
-	g.Night = false
-	g.Round = 0
-	g.NumPlayersAlive = 0
-
+	room.Players.Players = nil
+	room.Players.Players = make(map[int]*Player)
+	logging.Warning.Println("Game ended, disconnecting players....")
+	logging.Info.Printf("Players cleared: 'Players: %x'", room.Players.Players)
 }
 
 // glob variables export
