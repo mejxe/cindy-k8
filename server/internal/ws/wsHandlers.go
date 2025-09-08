@@ -61,6 +61,7 @@ func HandleRoom(ws *websocket.Conn) {
 		ws.Write([]byte("Token not provided."))
 		return
 	}
+	room.Players.Lock()
 	logging.Info.Printf("New connection opened!\n")
 
 	token := ws.Request().URL.Query().Get("token")
@@ -80,7 +81,14 @@ func HandleRoom(ws *websocket.Conn) {
 	json.NewEncoder(identity.Connection).
 		Encode(models.NewServerMessage(models.ServerMessageIdentity, identity.UpgradeMap(identity.Map())))
 
-	models.GlobalRoom.ClientInChannel <- models.NewClientMessage(models.ClientMessageGetState, identity, nil) // send get state request
+	// send get state request
+	models.GlobalRoom.ClientInChannel <- models.NewClientMessage(models.ClientMessageGetState, identity, nil)
+
+	// if vote on send vote state request
+	if models.GlobalRoom.GameState.CurrentVote != nil && models.GlobalRoom.GameState.CurrentVote.Started {
+		models.GlobalRoom.ClientInChannel <- models.
+			NewClientMessage(models.ClientMessageGetVoteInfo, identity, nil)
+	}
 
 	// notify already connected players about new join
 	body := map[string]any{
@@ -90,6 +98,7 @@ func HandleRoom(ws *websocket.Conn) {
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessagePlayerInfo, body)
 
 	buf := make([]byte, 1024)
+	room.Players.Unlock()
 	for {
 		// read, deserialize, and pass messages for further handling
 		n, err := ws.Read(buf)
@@ -108,6 +117,7 @@ func HandleRoom(ws *websocket.Conn) {
 
 		clientMsg.Author = identity
 
+		logging.Info.Printf("Succesfully marshaled the message: %s\n", clientMsg.String())
 		models.GlobalRoom.ClientInChannel <- clientMsg
 
 	}

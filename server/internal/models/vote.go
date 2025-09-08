@@ -1,8 +1,10 @@
 package models
 
+// TODO: Rewrite this bullshit
 import (
-	"encoding/json"
 	"math/rand/v2"
+
+	"github.com/mejxe/cindy-k8/internal/logging"
 )
 
 // Voting logic
@@ -50,7 +52,7 @@ func (v *Voter) Add(p *Player) {
 	curr.NextV = &NextV
 
 }
-func CreateVotersList(firstVoter *Player) *Voter {
+func (v *Vote) CreateVotersList(firstVoter *Player) {
 	// create a list of voters in random order
 	voterList := Voter{
 		Identity: firstVoter,
@@ -73,45 +75,58 @@ func CreateVotersList(firstVoter *Player) *Voter {
 	for _, key := range keys {
 		voterList.Add(GlobalRoom.Players.Players[key])
 	}
-	return &voterList
+	v.CurrentlyVoting = &voterList
 
 }
 
 // vote impl block
 func (v *Vote) Init() {
+	v.VoteChannel = make(chan SingleVote)
 	v.Votes = make(map[*Player]int)
 	for _, player := range GlobalRoom.Players.Players {
 		v.Votes[player] = 0
 	}
+	v.Started = true
 }
 
-func (v *Vote) Start(firstVoter *Player) {
+func (v *Vote) Start() {
 	// start the vote loop
-	v.Started = true
+	votersList := v.CurrentlyVoting // currently the first Voter
 	last := false
-	votersList := CreateVotersList(firstVoter)
-	json.NewEncoder(firstVoter.Connection).Encode(NewServerMessage(ServerMessageAwaitVote, nil))
 	for sVote := range v.VoteChannel {
+		logging.Info.Printf("Vote: Received a vote from: %d, for %d.\n", sVote.From.Id, sVote.ForWho.Id)
 		// receive votes and increment state
 		v.Votes[sVote.ForWho]++
-		if last {
-			// if the last person on the list, end vote
-			break
-		}
 		// consume the list, check if next is last
 		last = votersList.Next()
+		println("LAST?:", last)
+
+		GlobalRoom.OutChannel <- NewServerMessage(ServerMessageVoteUpdate, v.Map())
+		logging.Info.Println("Vote: Sending out vote updates.")
+
+		if last {
+			// if the last person on the list, end vote
+			logging.Info.Println("Vote: Last person voted, summarizing...")
+			break
+		}
 	}
 	GlobalRoom.GMInChannel <- GMMessage{Type: GMMessageSummarizeVote, Body: nil}
 }
-func (v *Vote) Finish() (votedOut *Player, voteAmount int) {
+func (v *Vote) Finish() (votedOut []*Player, voteAmount int) {
 	// finish the vote and sum up the votes
-	for player, votes := range v.Votes {
+	votedOut = []*Player{}
+	for _, votes := range v.Votes {
 		if votes > voteAmount {
 			voteAmount = votes
-			votedOut = player
+		}
+	}
+	for player, votes := range v.Votes {
+		if votes == voteAmount {
+			votedOut = append(votedOut, player)
 		}
 	}
 	v.Started = false
+	v = nil
 	return // returns player with most votes and amount of the votes
 
 }

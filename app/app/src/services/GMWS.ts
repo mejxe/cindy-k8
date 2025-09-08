@@ -5,7 +5,10 @@ import type { GameState } from "../types/types.ts"
 
 
 export function connectWSForGM(password: string, setVerified, setWS, setGameState, gameState) {
-  const ws = new WebSocket(`http://localhost:8080/gm?password=${password}`)
+  const host = window.location.hostname === 'localhost'
+    ? 'localhost'
+    : window.location.hostname;
+  const ws = new WebSocket(`ws://${host}:8080/gm?password=${password}`)
   ws.onopen = () => {
     console.log("Ws connected.")
     setWS(ws)

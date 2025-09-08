@@ -1,5 +1,5 @@
-import { ClientMessageTypes, type GameStateBody, type GMMessageType, type ParsedWSMessage, type WSMessage, type WSPlayerEliminated, type WSPlayerID, type WSPlayerInfo, type WSPlayerKicked } from "../types/messageTypes"
-import type { GameState } from "../types/types"
+import { ClientMessageTypes, type GameStateBody, type GMMessageType, type ParsedWSMessage, type WSMessage, type WSPlayerEliminated, type WSPlayerID, type WSPlayerInfo, type WSPlayerKicked, type WSVoteStarted, type WSVoteSummary, type WSVoteUpdate } from "../types/messageTypes"
+import type { GameState, VoteJSONBody } from "../types/types"
 
 // TODO: Maybe make different parser for gm
 export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
@@ -44,6 +44,28 @@ export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
       }
       case "id": {
         return message as WSPlayerID
+      }
+      case "voteStarted": {
+        return message as WSVoteStarted
+      }
+      case "voteUpdate": {
+        const msgBody: VoteJSONBody = message["body"]
+        const votesMap = new Map<number, number>();
+        for (const [playerIdStr, voteCount] of Object.entries(msgBody.votes)) {
+          console.log(playerIdStr, ": ", voteCount)
+          const playerId = parseInt(playerIdStr, 10);
+          votesMap.set(playerId, voteCount);
+        }
+        return {
+          type: "voteUpdate",
+          body: {
+            ...msgBody,
+            votes: votesMap
+          }
+        }
+      }
+      case "voteSummary": {
+        return message as WSVoteSummary
       }
       default: return null
     }

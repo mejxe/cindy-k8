@@ -1,8 +1,15 @@
-import type { Player } from "./types"
+import type { Player, Vote } from "./types"
 
 export type WSMessage = {
   type: MessageType,
-  body: string | null// TODO: change in the future for hard typed messages somehow
+  body: any | null// TODO: change in the future for hard typed messages somehow
+}
+
+export interface WSSingleVote extends WSMessage {
+  type: "vote",
+  body: {
+    "for": number
+  }
 }
 // TODO: Create a hard typed message type for each message
 export interface GameStateMessage {
@@ -30,12 +37,15 @@ export const GMMessageTypes = {
   End: "end",
   Manipualte: "manipulate",
   GetState: "gsgm",
-  ShiftTime: "timeshift"
+  ShiftTime: "timeshift",
+  StartVote: "startVote",
 } as const
 
 export const ClientMessageTypes = {
   Started: "started",
   GetState: "getGS",
+  voted: "vote",
+  voteFirst: "voteFirst"
 } as const
 export interface WSStartedMessage {
   type: "started",
@@ -61,6 +71,20 @@ export interface WSPlayerID {
   type: "id",
   body: { id: number, alive: boolean, connected: boolean, firstName: string, lastName: string, occupation: string, syndicate: boolean }
 }
+export type WSVoteStarted = {
+  type: "voteStarted"
+}
+export interface WSVoteUpdate {
+  type: "voteUpdate",
+  body: Vote
+}
+export type WSVoteSummary = {
+  type: "voteSummary",
+  body: {
+    amountOfVotes: number,
+    eliminated: [number] // ids of eliminated players
+  }
+}
 interface PlayerConnectedBody {
   action: "connected",
   players: [Player]
@@ -74,4 +98,5 @@ export type GMMessageType = typeof GMMessageTypes[keyof typeof GMMessageTypes]
 export type ClientMessageType = typeof ClientMessageTypes[keyof typeof ClientMessageTypes]
 export type MessageType = GMMessageType | ClientMessageType
 export type ParsedWSMessage = GameStateMessage | WSErrorMessage |
-  WSStartedMessage | WSEndedMessage | WSPlayerInfo | WSPlayerEliminated | WSPlayerKicked | WSPlayerID
+  WSStartedMessage | WSEndedMessage | WSPlayerInfo | WSPlayerEliminated | WSPlayerKicked | WSPlayerID | WSVoteStarted |
+  WSVoteUpdate | WSVoteSummary

@@ -1,3 +1,5 @@
+import type { Dispatch, RefObject, SetStateAction } from "react"
+import type { WSMessage } from "./messageTypes"
 
 export const States = {
   Loading: "loading",
@@ -16,9 +18,34 @@ export const defaultState: GameState = {
   holdingMic: null,
   voting: false,
 }
+export const defaultVote: Vote = {
+  type: "citizens",
+  voteOn: false,
+  currentlyVoting: null,
+  votingNext: null,
+  votes: new Map()
+
+}
 export const defaultGameInfo: GameInfo = {
   gameState: defaultState,
-  me: null
+  me: null,
+  vote: defaultVote,
+}
+type VoteType = "mafia" | "citizens"
+
+export type Vote = {
+  voteOn: boolean
+  type: VoteType,
+  currentlyVoting: number | null
+  votes: Map<number, number>, // player id : votes for player
+  votingNext: number | null
+}
+export type VoteJSONBody = {
+  voteOn: boolean
+  type: VoteType,
+  currentlyVoting: number | null
+  votes: Record<string, number>, // JSON has string keys
+  votingNext: number | null
 }
 
 export type Player = {
@@ -42,5 +69,19 @@ export type GameState = {
 export type GameInfo = {
   gameState: GameState,
   me: Player | null
+  vote: Vote
 }
 export type StateKeys = typeof States[keyof typeof States]
+export type WebSocketContextType = {
+  socket: WebSocket | null,
+  connected: boolean
+  sendMessage: (message: WSMessage) => void
+}
+export type wsHandlerFunction = (
+  ws: RefObject<WebSocket | null>,
+  setAppState: Dispatch<StateKeys>,
+  setToken: Dispatch<string | null>,
+  setGameState: Dispatch<SetStateAction<GameState>>,
+  setMe: Dispatch<Player | null>,
+  setVote: Dispatch<Vote>
+) => void

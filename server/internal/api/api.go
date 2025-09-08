@@ -2,15 +2,24 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/mejxe/cindy-k8/internal/logging"
 	"github.com/mejxe/cindy-k8/internal/models"
 )
 
 func HandleCreate(w http.ResponseWriter, r *http.Request) {
 	// endpoint for handling creation of characters
-	fmt.Printf("Server got a hit: %s\n", r.URL.Path)
+	logging.Info.Printf("Server got a hit: %s\n", r.URL.Path)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+	// Handle preflight OPTIONS request
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", 403)
 		return
@@ -41,4 +50,5 @@ func HandleCreate(w http.ResponseWriter, r *http.Request) {
 		"token":  player.Token,
 	}
 	json.NewEncoder(w).Encode(models.NewServerMessage(models.ServerMessageToken, msg))
+	logging.Success.Printf("Succesfully created a character, sending: %s\n", msg)
 }

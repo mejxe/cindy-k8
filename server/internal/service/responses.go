@@ -50,13 +50,23 @@ func MicPassed(from *models.Player, to *models.Player) {
 	}
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageMicPassed, message)
 }
+func VoteFirst(firstVoter *models.Player) {
+	logging.Info.Println("entered votefirst")
+	vote := models.GlobalRoom.GameState.CurrentVote
+	vote.CreateVotersList(firstVoter)
+	msg := vote.Map()
+	logging.Info.Println("will send: ", msg)
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteUpdate, msg)
+	go vote.Start()
+}
 
 func Voted(from *models.Player, forWho *models.Player) {
 	// called when player voted
 	vote := models.GlobalRoom.GameState.CurrentVote
-	if !from.Alive || !forWho.Alive || vote.CurrentlyVoting.Identity != from {
+	if !from.Alive || !forWho.Alive {
 		return
 	}
+	logging.Info.Println("Voted: Parsing a vote and sending it through vote channel!")
 	singleVote := models.SingleVote{From: from, ForWho: forWho}
 	vote.VoteChannel <- singleVote
 	message := map[string]any{
@@ -66,14 +76,18 @@ func Voted(from *models.Player, forWho *models.Player) {
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteReceived, message)
 
 }
-func SummarizeVote(eliminated *models.Player, voteAmount int) {
+func SummarizeVote(eliminated []*models.Player, voteAmount int) {
 	// called when vote ends
-	if !eliminated.Alive {
-		return
+	elimIds := []int{}
+	for _, elim := range eliminated {
+		elimIds = append(elimIds, elim.Id)
+		if !elim.Alive || len(eliminated) > 1 {
+			break
+		}
+		elim.Alive = false
 	}
-	eliminated.Alive = false
 	message := map[string]any{
-		"eliminated":    eliminated.Id,
+		"eliminated":    elimIds,
 		"amountOfVotes": voteAmount,
 	}
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteSummary, message)
@@ -82,6 +96,12 @@ func SendState(to *models.Player) {
 	// called when user requested state
 	json.NewEncoder(to.Connection).Encode(models.NewServerMessage(models.ServerMessageSendState,
 		models.GlobalRoom.GetState()))
+	logging.Info.Printf("SendState: Sending state to %s %s\n", to.FirstName, to.LastName)
+}
+func SendVoteInfo(to *models.Player) {
+	json.NewEncoder(to.Connection).
+		Encode(models.NewServerMessage(models.ServerMessageVoteUpdate, models.GlobalRoom.GameState.CurrentVote.Map()))
+	logging.Info.Printf("SendVoteInfo: Sending vote info to %s %s\n", to.FirstName, to.LastName)
 }
 
 // Sends game state to every connected client
@@ -161,4 +181,9 @@ func KillPlayer(player *models.Player) {
 	logging.Success.Println("Killed a player!")
 
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessagePKilled, message)
+}
+func StartVote() {
+	vote := models.GlobalRoom.GameState.CurrentVote
+	vote.Init()
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteStarted, nil)
 }

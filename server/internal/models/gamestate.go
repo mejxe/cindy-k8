@@ -26,6 +26,7 @@ func (g *GameState) StartGame() {
 	g.Started = true
 	g.Round = 0
 	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
+	g.CurrentVote = &Vote{}
 }
 
 // cycle through night and day
@@ -86,5 +87,6 @@ func (g *GameState) FinishGame(syndicateWins bool) GameSummary {
 	g.Night = false
 	g.Round = 0
 	g.NumPlayersAlive = 0
+	g.CurrentVote = nil
 	return gameSummary
 }

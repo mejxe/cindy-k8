@@ -30,8 +30,10 @@ func (room *Room) CloseConnections() {
 
 // glob variables export
 var GlobalRoom *Room = &Room{
-	Players:         &Players{Players: make(map[int]*Player)},
-	GameState:       &GameState{},
+	Players: &Players{Players: make(map[int]*Player)},
+	GameState: &GameState{
+		CurrentVote: &Vote{},
+	},
 	ClientInChannel: make(chan ClientMessage, 10),
 	GMInChannel:     make(chan GMMessage, 2),
 	OutChannel:      make(chan ServerMessage, 10),

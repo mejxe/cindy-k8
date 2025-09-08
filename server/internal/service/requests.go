@@ -55,16 +55,27 @@ func HandleEliminate(msg models.ClientMessage) {
 	}
 	Eliminated(perpetrator, killedPlayer)
 }
-func HandleVote(msg models.ClientMessage) {
-	// called when player votes for another player in the round ending vote
-	from := msg.Author
-	forWhoRaw := msg.Body["for"].(string)
-	forWhoId, err := strconv.Atoi(forWhoRaw)
-	if err != nil {
-		logging.Error.Printf("Error: Incorrect request body %s.", err.Error())
+func HandleVoteFirst(msg models.ClientMessage) {
+	// called when player presses the vote first button
+	vote := models.GlobalRoom.GameState.CurrentVote
+	if !vote.Started || vote.CurrentlyVoting != nil {
+		// if the vote is not on or the player is already voting decline the request
+		logging.Error.Println("HandleVoteFirst: Vote already started or there is someone currently voting")
 		return
 	}
-	forWho, ok := models.GlobalRoom.Players.Players[forWhoId]
+	author := msg.Author
+	VoteFirst(author)
+}
+func HandleVote(msg models.ClientMessage) {
+	// called when player votes for another player in the round ending vote
+	logging.Info.Println("Entered handle vote.")
+	from := msg.Author
+	forWhoID, ok := msg.Body["for"].(float64)
+	if !ok {
+		logging.Error.Println("Error: Incorrect request body.")
+		return
+	}
+	forWho, ok := models.GlobalRoom.Players.Players[int(forWhoID)]
 	if !ok {
 		logging.Error.Println("Error: Incorrect player id in HandleVote.")
 		return
@@ -76,11 +87,16 @@ func HandleSendState(msg models.ClientMessage) {
 	to := msg.Author
 	SendState(to)
 }
-func HandleSendStateToEveryone() {
-	SendStateToEveryone()
+func HandleGetVoteInfo(msg models.ClientMessage) {
+	to := msg.Author
+	SendVoteInfo(to)
 }
 
 // GM
+
+func HandleSendStateToEveryone() {
+	SendStateToEveryone()
+}
 
 func HandleSendGMState() {
 	if !models.GlobalRoom.GameMaster.Connected {
@@ -144,4 +160,11 @@ func HandleNextRound() {
 func HandleShiftTime() {
 	// cycle through night and day
 	ShiftTime()
+}
+func HandleStartVote() {
+	if models.GlobalRoom.GameState.CurrentVote.Started {
+		logging.Error.Println("HandleStartVote: Vote is already started.")
+		return
+	}
+	StartVote()
 }

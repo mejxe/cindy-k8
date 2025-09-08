@@ -1,12 +1,21 @@
 import { sendRequest } from "../../services/shared";
-import { GMMessageTypes, type GMMessageType, type WSMessage } from "../../types/messageTypes";
-import type { GameState } from "../../types/types";
+import { GMMessageTypes } from "../../types/messageTypes";
+import type { GameInfo, GameState } from "../../types/types";
 import "./GameState.css"
 
-export default function GameState({ gamestate, ws }: { gamestate: GameState, ws: WebSocket }) {
+export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: WebSocket }) {
+  const gamestate = gameInfo.gameState
+  const vote = gameInfo.vote
   const night = gamestate.night ? "Nighttime" : "Daytime"
   const started = gamestate.started ? "started" : "Not started"
   const controls = getControlState(gamestate)
+
+
+  const startVote = () => {
+    sendRequest(ws, "startVote", null)
+  }
+
+
   return (<div className="game-state">
     <h1>Control Panel</h1>
 
@@ -23,6 +32,25 @@ export default function GameState({ gamestate, ws }: { gamestate: GameState, ws:
           {controls.startControl.startButton.text}
         </button>
       </div>
+
+      {/* Vote Control */}
+      <div className={controls.voteControl.className}>
+        <h4>
+          Vote Control
+          <p className={`status-indicator ${vote.voteOn ? 'status-vote-active' : 'status-vote-inactive'}`}>
+            {vote.voteOn ? "Vote is ON" : "Vote is off"}
+          </p>
+        </h4>
+        <div className="vote-buttons">
+          <button onClick={startVote} className="control-btn vote-btn">
+            Start Vote
+          </button>
+          <button onClick={() => { /* Handle open vote modal */ }} className="control-btn vote-btn secondary">
+            Open Vote
+          </button>
+        </div>
+      </div>
+
 
       {/* Round Control */}
       <div className={controls.roundControl.className}>
@@ -71,6 +99,10 @@ function getControlState(state: GameState) {
     roundControl: {
       disabled: state.started && state.night,
       className: (state.started && state.night) ? "control-group" : "control-group disabled"
+    },
+    voteControl: {
+      disabled: !state.started,
+      className: state.started ? "control-group" : "control-group disabled"
     },
     timeControl: {
       disabled: !state.started,

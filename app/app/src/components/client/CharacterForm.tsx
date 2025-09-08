@@ -8,8 +8,13 @@ export default function CharacterForm({ setToken }: { setToken: Dispatch<SetStat
     formData.forEach((value, key) => {
       params.append(key, value.toString())
     })
+
+    const host = window.location.hostname === 'localhost'
+      ? 'localhost'
+      : window.location.hostname;
+
     const response =
-      await fetch("http://localhost:8080/create", {
+      await fetch(`http://${host}:8080/create`, {
         method: "POST", headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         }, body: params

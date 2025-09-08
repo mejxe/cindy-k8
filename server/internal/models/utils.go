@@ -92,7 +92,7 @@ func (gs *GameState) Map() map[string]any {
 }
 
 func (cs *ClientMessage) String() string {
-	return fmt.Sprintf("author: %s\nbody: %s", cs.Author, cs.Body)
+	return fmt.Sprintf("type: %s\nauthor: %s\nbody: %s", cs.Type, cs.Author, cs.Body)
 }
 
 // GM Implementation block
@@ -126,5 +126,28 @@ func (s *GameSummary) Map() map[string]any {
 		"playersLeft":   s.PlayersLeft,
 		"syndicateWins": s.SyndicateWins,
 		"syndicate":     s.SyndicateIDs,
+	}
+}
+func (v *Vote) Map() map[string]any {
+	var currentlyVoting *int = nil
+	var votingNext *int = nil
+	if v.CurrentlyVoting != nil {
+		currentlyVoting = &v.CurrentlyVoting.Identity.Id
+	}
+	if currentlyVoting != nil && v.CurrentlyVoting.NextV != nil {
+		votingNext = &v.CurrentlyVoting.NextV.Identity.Id
+	}
+
+	votesMap := make(map[int]int) // PlayerID: voteAmount
+	for player, votes := range v.Votes {
+		votesMap[player.Id] = votes
+	}
+
+	return map[string]any{
+		"voteOn":          v.Started,
+		"type":            "citizen",
+		"currentlyVoting": currentlyVoting,
+		"votingNext":      votingNext,
+		"votes":           votesMap,
 	}
 }

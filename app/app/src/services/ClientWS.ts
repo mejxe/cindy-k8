@@ -1,21 +1,39 @@
 import type { Dispatch, RefObject, SetStateAction } from "react"
 import { ClientMessageTypes, type GameStateMessage, type ParsedWSMessage, type WSMessage } from "../types/messageTypes"
-import { defaultState, States, type GameState, type Player, type StateKeys } from "../types/types"
+import { defaultState, defaultVote, States, type GameState, type Player, type StateKeys, type Vote } from "../types/types"
 import { parseWSMessages, updateGameState } from "./shared"
 import toast from "react-hot-toast"
+import PlayerList from "../components/admin/PlayerList"
 
 
-export function handleWSMessages(message: ParsedWSMessage, setAppState, websocket: RefObject<WebSocket | null>, setToken, setGameState: Dispatch<SetStateAction<GameState>>, setMe: Dispatch<SetStateAction<Player | null>>) {
+export function handleWSMessages(message: ParsedWSMessage,
+  setAppState,
+  websocket: RefObject<WebSocket | null>,
+  setToken,
+  setGameState: Dispatch<SetStateAction<GameState>>,
+  setMe: Dispatch<SetStateAction<Player | null>>,
+  setVote: Dispatch<SetStateAction<Vote>>
+) {
   console.log(message.type)
   if (websocket.current === null) {
     console.log("null socket wtf?")
     return
   }
+  const clear = () => {
+    if (websocket.current !== null) {
+      websocket.current.close()
+    }
+    websocket.current = null
+    setGameState(defaultState)
+    setAppState(States.CharacterCreation)
+    setVote(defaultVote)
+    localStorage.clear()
+
+  }
   switch (message.type) {
     case "error": {
       console.error(message.body.message)
-      websocket.current = null
-      setToken(null)
+      clear()
       break
     }
     case "gameState": {
@@ -41,7 +59,6 @@ export function handleWSMessages(message: ParsedWSMessage, setAppState, websocke
       break
     }
     case "playerInfo": {
-      console.log("hit player info")
       switch (message.body.action) {
         case "connected": {
           const players = message.body.players
@@ -100,6 +117,8 @@ export function handleWSMessages(message: ParsedWSMessage, setAppState, websocke
               color: '#fff',
             },
           })
+          clear()
+          setToken(null)
           return null
         }
         return prevMe
@@ -108,7 +127,7 @@ export function handleWSMessages(message: ParsedWSMessage, setAppState, websocke
         const updatedPlayers = [...prevState.players]
         const player = updatedPlayers.find(p => p.id === playerID)
         if (player === undefined) {
-          console.log("Eliminated handler: Player is null")
+          console.log("Kicked handler: Player is null")
           return prevState
         }
         updatedPlayers.splice(playerID, 1)
@@ -121,22 +140,76 @@ export function handleWSMessages(message: ParsedWSMessage, setAppState, websocke
     }
     case "ended": {
       console.log("clearing cache")
-      websocket.current.close()
+      clear()
       setToken(null)
-      setGameState(defaultState)
-      setAppState(States.CharacterCreation)
-      localStorage.clear()
       break
+    }
+    case "voteStarted": {
+      setVote(prevVote => ({
+        ...prevVote,
+        voteOn: true
+      })
+      )
+      break
+
     }
     case "id": {
       const me: Player = message.body
       setMe(me)
       break
     }
+    case "voteUpdate": {
+      const newVote = message.body
+      console.log("newVote: ", message)
+      setVote(() => ({
+        ...newVote
+      }))
+      break
+    }
+    case "voteSummary": {
+      const result = message.body
+      setGameState(prevState => {
+
+        if (result.eliminated.length > 1) {
+          const msg = result.eliminated.map((val) => {
+            const player = prevState.players.find(p => p.id === val)
+            if (player === undefined) {
+              console.error("Vote Summary: Error while searching for player")
+              return ""
+            }
+            return player.firstName + " " + player.lastName
+          })
+          msg.join(", ")
+          toast(`The vote is tied! ${msg} all have ${result.amountOfVotes} vote(s)`, {})
+          return prevState
+        }
+
+        const updatedPlayers = [...prevState.players]
+        const player = updatedPlayers.find(p => p.id === result.eliminated[0])
+        if (player === undefined) {
+          console.error("Vote Summary: Player is null")
+          return prevState
+        }
+        player.alive = false
+        toast(`${player.firstName} ${player.lastName} is eliminated with ${result.amountOfVotes} vote(s). Goodbye!`, {})
+        return {
+          ...prevState,
+          players: updatedPlayers
+        }
+      })
+      setVote(prevVote => ({
+        ...prevVote,
+        voteOn: false,
+      }))
+      break
+    }
   }
 }
 export function connectWS(token: string, setToken: Dispatch<string | null>): WebSocket {
-  const ws = new WebSocket(`http://localhost:8080/ws?token=${token}`)
+  const host = window.location.hostname === 'localhost'
+    ? 'localhost'
+    : window.location.hostname;
+  const ws = new WebSocket(`http://${host}:8080/ws?token=${token}`)
   ws.onopen = () => {
     console.log("Ws connected.")
   }
@@ -146,7 +219,15 @@ export function connectWS(token: string, setToken: Dispatch<string | null>): Web
   }
   return ws
 }
-export function AttachClientMessageHandler(ws: RefObject<WebSocket | null>, setAppState: Dispatch<StateKeys>, setToken: Dispatch<string | null>, setGameState: Dispatch<SetStateAction<GameState>>, setMe: Dispatch<Player | null>) {
+export function AttachClientMessageHandler(ws: RefObject<WebSocket | null>,
+  setAppState: Dispatch<StateKeys>,
+  setToken: Dispatch<string | null>,
+  setGameState: Dispatch<SetStateAction<GameState>>,
+  setMe: Dispatch<Player | null>,
+  setVote: Dispatch<Vote>
+
+) {
+  console.log("in the attach!")
   if (ws.current === null) {
     console.log("null socket in attach")
     return
@@ -157,7 +238,7 @@ export function AttachClientMessageHandler(ws: RefObject<WebSocket | null>, setA
       if (msg === null) {
         return
       }
-      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe)
+      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote)
     } catch (e) {
       console.error(e)
     }

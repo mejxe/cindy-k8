@@ -11,10 +11,12 @@ type GMManipulateAction string
 
 // Client Message Types
 const (
-	ClientMessagePassMic  MessageType = "mic"
-	ClientMessageVote     MessageType = "vote"
-	ClientMessageKill     MessageType = "kill"
-	ClientMessageGetState MessageType = "getGS"
+	ClientMessagePassMic     MessageType = "mic"
+	ClientMessageVote        MessageType = "vote"
+	ClientMessageKill        MessageType = "kill"
+	ClientMessageGetState    MessageType = "getGS"
+	ClientMessageVoteFirst   MessageType = "voteFirst"
+	ClientMessageGetVoteInfo MessageType = "getVoteInfo"
 )
 
 // GM MessageTypes
@@ -28,6 +30,7 @@ const (
 	GMMessageSendState           MessageType = "gsgm"
 	GMMessageShiftTime           MessageType = "timeshift"
 	GMMessageSendStateToEveryone MessageType = "gsGlobal"
+	GMMessageStartVote           MessageType = "startVote"
 )
 
 // GM Manipulate Actions
@@ -54,6 +57,8 @@ const (
 	ServerMessagePlayerInfo   MessageType = "playerInfo"
 	ServerMessageKicked       MessageType = "kicked"
 	ServerMessageIdentity     MessageType = "id"
+	ServerMessageVoteStarted  MessageType = "voteStarted"
+	ServerMessageVoteUpdate   MessageType = "voteUpdate"
 	ServerError               MessageType = "error"
 )
 

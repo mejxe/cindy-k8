@@ -20,6 +20,10 @@ func HandleClientMessages() {
 			service.HandleVote(msg)
 		case models.ClientMessageGetState:
 			service.HandleSendState(msg)
+		case models.ClientMessageVoteFirst:
+			service.HandleVoteFirst(msg)
+		case models.ClientMessageGetVoteInfo:
+			service.HandleGetVoteInfo(msg)
 		}
 	}
 }
@@ -45,6 +49,8 @@ func HandleGMMessages() {
 			service.HandleNextRound()
 		case models.GMMessageShiftTime:
 			service.HandleShiftTime()
+		case models.GMMessageStartVote:
+			service.HandleStartVote()
 		}
 	}
 }
