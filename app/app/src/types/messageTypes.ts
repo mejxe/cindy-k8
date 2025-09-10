@@ -44,8 +44,9 @@ export const GMMessageTypes = {
 export const ClientMessageTypes = {
   Started: "started",
   GetState: "getGS",
-  voted: "vote",
-  voteFirst: "voteFirst"
+  Voted: "vote",
+  VoteFirst: "voteFirst",
+  GetMe: "getMe",
 } as const
 export interface WSStartedMessage {
   type: "started",

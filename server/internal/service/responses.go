@@ -10,18 +10,10 @@ import (
 
 // FLOW: (Modify state/Pass data to modify state) and notify user client(s)
 
-func Eliminated(syndicate *models.Player, citizen *models.Player) {
-	// called when player is killed by syndicate
-	if !syndicate.Syndicate || citizen.Syndicate || !citizen.Alive {
-		return
-	}
-	citizen.Alive = false
-	message := map[string]any{
-		"whoDied": citizen.Id,
-	}
-	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessagePKilled, message)
+func SendIdentity(to *models.Player) {
+	json.NewEncoder(to.Connection).
+		Encode(models.NewServerMessage(models.ServerMessageIdentity, to.UpgradeMap(to.Map())))
 }
-
 func FoundBody(player *models.Player, body *models.DeadBody) {
 	// called when player found a body, notifies only the player
 	message := map[string]any{
@@ -51,8 +43,9 @@ func MicPassed(from *models.Player, to *models.Player) {
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageMicPassed, message)
 }
 func VoteFirst(firstVoter *models.Player) {
+	// only applicable to City Vote
 	logging.Info.Println("entered votefirst")
-	vote := models.GlobalRoom.GameState.CurrentVote
+	vote := models.GlobalRoom.GameState.CurrentVote.(*models.CityVote)
 	vote.CreateVotersList(firstVoter)
 	msg := vote.Map()
 	logging.Info.Println("will send: ", msg)
@@ -68,28 +61,53 @@ func Voted(from *models.Player, forWho *models.Player) {
 	}
 	logging.Info.Println("Voted: Parsing a vote and sending it through vote channel!")
 	singleVote := models.SingleVote{From: from, ForWho: forWho}
-	vote.VoteChannel <- singleVote
+	vote.GetChannel() <- singleVote
 	message := map[string]any{
 		"from": from.Id,
 		"for":  forWho.Id,
 	}
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteReceived, message)
-
 }
+
+func VotedForElimination(syndicate *models.Player, citizen *models.Player) {
+	// called when player is killed by syndicate
+	if !syndicate.Syndicate || citizen.Syndicate || !citizen.Alive {
+		return
+	}
+	vote := models.GlobalRoom.GameState.CurrentVote
+	logging.Info.Println("Voted: Parsing a vote and sending it through vote channel!")
+	singleVote := models.SingleVote{From: syndicate, ForWho: citizen}
+	vote.GetChannel() <- singleVote
+	message := map[string]any{
+		"from": syndicate.Id,
+		"for":  citizen.Id,
+	}
+	// TODO: Send the message only to syndicate
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteReceived, message)
+	//citizen.Alive = false
+	//message := map[string]any{
+	//	"whoDied": citizen.Id,
+	//}
+	//models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessagePKilled, message)
+}
+
 func SummarizeVote(eliminated []*models.Player, voteAmount int) {
 	// called when vote ends
-	elimIds := []int{}
+	elimIds := make([]int, 0)
 	for _, elim := range eliminated {
-		elimIds = append(elimIds, elim.Id)
-		if !elim.Alive || len(eliminated) > 1 {
+		if !elim.Alive {
 			break
 		}
-		elim.Alive = false
+		elimIds = append(elimIds, elim.Id)
+		if len(eliminated) == 1 {
+			elim.Alive = false
+		}
 	}
 	message := map[string]any{
 		"eliminated":    elimIds,
 		"amountOfVotes": voteAmount,
 	}
+	models.GlobalRoom.GMInChannel <- models.NewGMMessage(models.GMMessageShiftTime, nil)
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteSummary, message)
 }
 func SendState(to *models.Player) {
@@ -120,7 +138,7 @@ func StartGame() {
 	if models.GlobalRoom.GameState.Started {
 		return
 	}
-	models.GlobalRoom.GameState.StartGame()
+	models.GlobalRoom.StartGame()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageStart, nil)
 }
 func EndGame(msg models.GMMessage) {

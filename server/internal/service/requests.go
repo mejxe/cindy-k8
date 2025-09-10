@@ -10,6 +10,11 @@ import (
 // FLOW: Parse the ClientMessage from the request -> call response function with parsed parameters
 
 // CLIENT
+func HandleGetIdentity(msg models.ClientMessage) {
+	to := msg.Author
+	SendIdentity(to)
+
+}
 func HandleReportBody(msg models.ClientMessage) {
 	// called when player reports a body, checks if the bodyData is correct
 	bodyOf, ok := msg.Body["bodyOf"].(string)
@@ -39,26 +44,36 @@ func HandlePassMic(msg models.ClientMessage) {
 	}
 	MicPassed(from, toPlayer)
 }
-func HandleEliminate(msg models.ClientMessage) {
+func HandleEliminateVote(msg models.ClientMessage) {
+	vote, ok := models.GlobalRoom.GameState.CurrentVote.(*models.SyndicateVote)
+	if (!ok) || vote.GetStarted() {
+		logging.Error.Printf("HandleEliminate: The vote is not on.")
+		return
+	}
 	// called when player wants to kill another player
-	perpetrator := msg.Author // :)
-	killedRaw := msg.Body["kill"].(string)
-	killedID, err := strconv.Atoi(killedRaw)
+	perpetrator := msg.Author
+	votedRaw := msg.Body["kill"].(string)
+	votedID, err := strconv.Atoi(votedRaw)
 	if err != nil {
 		logging.Error.Printf("Error: Incorrect request body %s.", err.Error())
 		return
 	}
-	killedPlayer, ok := models.GlobalRoom.Players.Players[killedID]
+	votedPlayer, ok := models.GlobalRoom.Players.Players[votedID]
 	if !ok {
 		logging.Error.Println("Error: Incorrect player id in HandleEliminate.")
 		return
 	}
-	Eliminated(perpetrator, killedPlayer)
+	VotedForElimination(perpetrator, votedPlayer)
 }
 func HandleVoteFirst(msg models.ClientMessage) {
 	// called when player presses the vote first button
-	vote := models.GlobalRoom.GameState.CurrentVote
-	if !vote.Started || vote.CurrentlyVoting != nil {
+	vote, ok := models.GlobalRoom.GameState.CurrentVote.(*models.CityVote)
+
+	if !ok {
+		logging.Error.Printf("HandleVoteFirst: Incorrect vote type.")
+		return
+	}
+	if !vote.GetStarted() || vote.CurrentlyVoting != nil {
 		// if the vote is not on or the player is already voting decline the request
 		logging.Error.Println("HandleVoteFirst: Vote already started or there is someone currently voting")
 		return
@@ -162,7 +177,7 @@ func HandleShiftTime() {
 	ShiftTime()
 }
 func HandleStartVote() {
-	if models.GlobalRoom.GameState.CurrentVote.Started {
+	if models.GlobalRoom.GameState.CurrentVote.GetStarted() {
 		logging.Error.Println("HandleStartVote: Vote is already started.")
 		return
 	}

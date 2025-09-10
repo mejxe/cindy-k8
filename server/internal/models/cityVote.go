@@ -1,6 +1,5 @@
 package models
 
-// TODO: Rewrite this bullshit
 import (
 	"math/rand/v2"
 
@@ -9,23 +8,19 @@ import (
 
 // Voting logic
 
-type Vote struct {
+type CityVote struct {
 	// 1 vote per round
 	Votes           map[*Player]int // num of votes per player
 	CurrentlyVoting *Voter          // person currently voting represented by a linked list (next = next voter in queue)
 	Started         bool            // if the vote started already
 	VoteChannel     chan SingleVote // votes received by server come through here
+	AlreadyVoted    []int           // player ids for syncing with front
 }
 type Voter struct {
 	// linked listed for easy iteration while voting
 	Identity *Player
 	NextV    *Voter
 	VotedFor *Player
-}
-type SingleVote struct {
-	// a single vote, used to send data from user vote calls to the server (requests/Voted())
-	From   *Player
-	ForWho *Player
 }
 
 func (v *Voter) Next() (last bool) {
@@ -52,7 +47,7 @@ func (v *Voter) Add(p *Player) {
 	curr.NextV = &NextV
 
 }
-func (v *Vote) CreateVotersList(firstVoter *Player) {
+func (v *CityVote) CreateVotersList(firstVoter *Player) {
 	// create a list of voters in random order
 	voterList := Voter{
 		Identity: firstVoter,
@@ -80,7 +75,7 @@ func (v *Vote) CreateVotersList(firstVoter *Player) {
 }
 
 // vote impl block
-func (v *Vote) Init() {
+func (v *CityVote) Init() {
 	v.VoteChannel = make(chan SingleVote)
 	v.Votes = make(map[*Player]int)
 	for _, player := range GlobalRoom.Players.Players {
@@ -89,7 +84,7 @@ func (v *Vote) Init() {
 	v.Started = true
 }
 
-func (v *Vote) Start() {
+func (v *CityVote) Start() {
 	// start the vote loop
 	votersList := v.CurrentlyVoting // currently the first Voter
 	last := false
@@ -98,6 +93,7 @@ func (v *Vote) Start() {
 		// receive votes and increment state
 		v.Votes[sVote.ForWho]++
 		// consume the list, check if next is last
+		v.AlreadyVoted = append(v.AlreadyVoted, sVote.From.Id)
 		last = votersList.Next()
 		println("LAST?:", last)
 
@@ -112,23 +108,34 @@ func (v *Vote) Start() {
 	}
 	GlobalRoom.GMInChannel <- GMMessage{Type: GMMessageSummarizeVote, Body: nil}
 }
-func (v *Vote) Finish() (votedOut []*Player, voteAmount int) {
+func (v *CityVote) Finish() ([]*Player, int) {
 	// finish the vote and sum up the votes
-	votedOut = []*Player{}
+	votedOut := make([]*Player, 0)
+	voteAmount := 0
+	logging.Error.Printf("%x", votedOut)
+	logging.Error.Printf("%x", v.Votes)
 	for _, votes := range v.Votes {
 		if votes > voteAmount {
 			voteAmount = votes
 		}
 	}
+	println("vote amount = ", voteAmount)
 	for player, votes := range v.Votes {
 		if votes == voteAmount {
 			votedOut = append(votedOut, player)
+			logging.Error.Printf("voted out = %x", votedOut)
 		}
 	}
 	v.Started = false
 	v = nil
-	return // returns player with most votes and amount of the votes
+	return votedOut, voteAmount // returns player(s) with most votes and amount of the votes
 
+}
+func (v *CityVote) GetChannel() chan SingleVote {
+	return v.VoteChannel
+}
+func (v *CityVote) GetStarted() bool {
+	return v.Started
 }
 
 // end

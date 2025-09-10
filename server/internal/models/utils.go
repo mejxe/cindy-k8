@@ -128,7 +128,7 @@ func (s *GameSummary) Map() map[string]any {
 		"syndicate":     s.SyndicateIDs,
 	}
 }
-func (v *Vote) Map() map[string]any {
+func (v *CityVote) Map() map[string]any {
 	var currentlyVoting *int = nil
 	var votingNext *int = nil
 	if v.CurrentlyVoting != nil {
@@ -149,5 +149,20 @@ func (v *Vote) Map() map[string]any {
 		"currentlyVoting": currentlyVoting,
 		"votingNext":      votingNext,
 		"votes":           votesMap,
+		"alreadyVoted":    v.AlreadyVoted,
 	}
+}
+func (v *SyndicateVote) Map() map[string]any {
+	votesMap := make(map[int]int) // PlayerID: voteAmount
+	for player, votes := range v.Votes {
+		votesMap[player.Id] = votes
+	}
+
+	return map[string]any{
+		"voteOn":       v.Started,
+		"type":         "syndicate",
+		"votes":        votesMap,
+		"alreadyVoted": v.AlreadyVoted,
+	}
+
 }

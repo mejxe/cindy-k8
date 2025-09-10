@@ -13,7 +13,7 @@ func HandleClientMessages() {
 	for msg := range models.GlobalRoom.ClientInChannel {
 		switch msg.Type {
 		case models.ClientMessageKill:
-			service.HandleEliminate(msg)
+			service.HandleEliminateVote(msg)
 		case models.ClientMessagePassMic:
 			service.HandlePassMic(msg)
 		case models.ClientMessageVote:
@@ -24,6 +24,8 @@ func HandleClientMessages() {
 			service.HandleVoteFirst(msg)
 		case models.ClientMessageGetVoteInfo:
 			service.HandleGetVoteInfo(msg)
+		case models.ClientMessageGetIdentity:
+			service.HandleGetIdentity(msg)
 		}
 	}
 }

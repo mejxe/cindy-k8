@@ -17,6 +17,7 @@ const (
 	ClientMessageGetState    MessageType = "getGS"
 	ClientMessageVoteFirst   MessageType = "voteFirst"
 	ClientMessageGetVoteInfo MessageType = "getVoteInfo"
+	ClientMessageGetIdentity MessageType = "getMe"
 )
 
 // GM MessageTypes

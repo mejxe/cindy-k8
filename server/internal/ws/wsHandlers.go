@@ -85,7 +85,7 @@ func HandleRoom(ws *websocket.Conn) {
 	models.GlobalRoom.ClientInChannel <- models.NewClientMessage(models.ClientMessageGetState, identity, nil)
 
 	// if vote on send vote state request
-	if models.GlobalRoom.GameState.CurrentVote != nil && models.GlobalRoom.GameState.CurrentVote.Started {
+	if models.GlobalRoom.GameState.CurrentVote != nil && models.GlobalRoom.GameState.CurrentVote.GetStarted() {
 		models.GlobalRoom.ClientInChannel <- models.
 			NewClientMessage(models.ClientMessageGetVoteInfo, identity, nil)
 	}
@@ -117,7 +117,7 @@ func HandleRoom(ws *websocket.Conn) {
 
 		clientMsg.Author = identity
 
-		logging.Info.Printf("Succesfully marshaled the message: %s\n", clientMsg.String())
+		logging.Info.Printf("Succesfully marshaled the message")
 		models.GlobalRoom.ClientInChannel <- clientMsg
 
 	}

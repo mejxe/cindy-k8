@@ -1,29 +1,29 @@
 import type { Dispatch, RefObject, SetStateAction } from "react"
 import { ClientMessageTypes, type GameStateMessage, type ParsedWSMessage, type WSMessage } from "../types/messageTypes"
 import { defaultState, defaultVote, States, type GameState, type Player, type StateKeys, type Vote } from "../types/types"
-import { parseWSMessages, updateGameState } from "./shared"
+import { parseWSMessages, sendGSRequest, sendRequest, updateGameState } from "./shared"
 import toast from "react-hot-toast"
 import PlayerList from "../components/admin/PlayerList"
 
 
 export function handleWSMessages(message: ParsedWSMessage,
   setAppState,
-  websocket: RefObject<WebSocket | null>,
+  websocket: WebSocket | null,
   setToken,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<SetStateAction<Player | null>>,
   setVote: Dispatch<SetStateAction<Vote>>
 ) {
   console.log(message.type)
-  if (websocket.current === null) {
+  if (websocket === null) {
     console.log("null socket wtf?")
     return
   }
   const clear = () => {
-    if (websocket.current !== null) {
-      websocket.current.close()
+    if (websocket !== null) {
+      websocket.close()
     }
-    websocket.current = null
+    websocket = null
     setGameState(defaultState)
     setAppState(States.CharacterCreation)
     setVote(defaultVote)
@@ -54,8 +54,8 @@ export function handleWSMessages(message: ParsedWSMessage,
     }
     case "started": {
       setAppState(States.Game)
-      const message: WSMessage = { type: ClientMessageTypes.GetState, body: null }
-      websocket.current.send(JSON.stringify(message))
+      sendGSRequest(websocket)
+      sendRequest(websocket, ClientMessageTypes.GetMe, null)
       break
     }
     case "playerInfo": {
@@ -145,8 +145,8 @@ export function handleWSMessages(message: ParsedWSMessage,
       break
     }
     case "voteStarted": {
-      setVote(prevVote => ({
-        ...prevVote,
+      setVote(() => ({
+        ...defaultVote,
         voteOn: true
       })
       )
@@ -194,24 +194,30 @@ export function handleWSMessages(message: ParsedWSMessage,
         toast(`${player.firstName} ${player.lastName} is eliminated with ${result.amountOfVotes} vote(s). Goodbye!`, {})
         return {
           ...prevState,
+          night: true,
           players: updatedPlayers
         }
       })
-      setVote(prevVote => ({
-        ...prevVote,
-        voteOn: false,
+      setVote(() => ({
+        ...defaultVote,
       }))
       break
     }
   }
 }
-export function connectWS(token: string, setToken: Dispatch<string | null>): WebSocket {
+export function connectWS(token: string, setToken: Dispatch<string | null>,
+  setAppState: Dispatch<StateKeys>,
+  setGameState: Dispatch<SetStateAction<GameState>>,
+  setMe: Dispatch<Player | null>,
+  setVote: Dispatch<Vote>): WebSocket {
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
   const ws = new WebSocket(`http://${host}:8080/ws?token=${token}`)
   ws.onopen = () => {
     console.log("Ws connected.")
+    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote)
+    sendGSRequest(ws)
   }
   ws.onclose = () => {
     console.log("Ws disconnected")
@@ -219,7 +225,7 @@ export function connectWS(token: string, setToken: Dispatch<string | null>): Web
   }
   return ws
 }
-export function AttachClientMessageHandler(ws: RefObject<WebSocket | null>,
+export function AttachClientMessageHandler(ws: WebSocket,
   setAppState: Dispatch<StateKeys>,
   setToken: Dispatch<string | null>,
   setGameState: Dispatch<SetStateAction<GameState>>,
@@ -227,12 +233,7 @@ export function AttachClientMessageHandler(ws: RefObject<WebSocket | null>,
   setVote: Dispatch<Vote>
 
 ) {
-  console.log("in the attach!")
-  if (ws.current === null) {
-    console.log("null socket in attach")
-    return
-  }
-  ws.current.onmessage = (event) => {
+  ws.onmessage = (event) => {
     try {
       const msg = parseWSMessages(event.data)
       if (msg === null) {
@@ -243,5 +244,7 @@ export function AttachClientMessageHandler(ws: RefObject<WebSocket | null>,
       console.error(e)
     }
   }
+  console.log("attached the ws")
+  console.log(ws)
 }
 

@@ -23,7 +23,8 @@ export const defaultVote: Vote = {
   voteOn: false,
   currentlyVoting: null,
   votingNext: null,
-  votes: new Map()
+  votes: new Map(),
+  alreadyVoted: new Set<number>()
 
 }
 export const defaultGameInfo: GameInfo = {
@@ -38,7 +39,8 @@ export type Vote = {
   type: VoteType,
   currentlyVoting: number | null
   votes: Map<number, number>, // player id : votes for player
-  votingNext: number | null
+  votingNext: number | null,
+  alreadyVoted: Set<number>
 }
 export type VoteJSONBody = {
   voteOn: boolean
@@ -46,6 +48,7 @@ export type VoteJSONBody = {
   currentlyVoting: number | null
   votes: Record<string, number>, // JSON has string keys
   votingNext: number | null
+  alreadyVoted: [number]
 }
 
 export type Player = {

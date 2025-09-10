@@ -13,8 +13,7 @@ export default function VotingModal({
   me,
 }: { players: Player[], vote: Vote, me: Player }) {
   const [selectedVote, setSelectedVote] = useState<number | null>(null);
-  const [hasVoted, setHasVoted] = useState(false);
-  // TODO: HAVE TO TRACK WHO HAS VOTED IN BACKEND!!!
+  const hasVoted = vote.alreadyVoted.has(me.id)
   const showVoteFirstButton = true
   const websocket = useWebSocket()
 
@@ -25,7 +24,6 @@ export default function VotingModal({
   const handleVote = (playerId: number) => {
     if (hasVoted) return;
     setSelectedVote(playerId);
-    setHasVoted(true);
     const msg: WSSingleVote = {
       type: "vote",
       body: { for: playerId }

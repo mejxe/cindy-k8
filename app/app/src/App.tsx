@@ -9,7 +9,7 @@ import Header from './components/client/Header'
 import GameScreen from './components/client/GameScreen'
 import { Toaster } from 'react-hot-toast'
 import { WebSocketProvider } from './services/WSProvider.tsx'
-import type { WSMessage } from './types/messageTypes.ts'
+import { sendGSRequest } from './services/shared.ts'
 
 
 export default function App() {
@@ -28,8 +28,7 @@ export default function App() {
       setAppState(States.CharacterCreation)
       return
     }
-    websocket.current = connectWS(token, setToken)
-    AttachClientMessageHandler(websocket, setAppState, setToken, setGameState, setMe, setVote)
+    websocket.current = connectWS(token, setToken, setAppState, setGameState, setMe, setVote)
     console.log("WEBSOCKET CURRENT: ", websocket.current)
     localStorage.setItem("token", token)
   }, [token])

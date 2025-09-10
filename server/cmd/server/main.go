@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/mejxe/cindy-k8/internal/api"
+	"github.com/mejxe/cindy-k8/internal/logging"
 	"github.com/mejxe/cindy-k8/internal/models"
 	"github.com/mejxe/cindy-k8/internal/ws"
 	"golang.org/x/net/websocket"
@@ -33,7 +34,9 @@ func main() {
 	http.Handle("/", http.FileServerFS(reactDir))
 	http.Handle("/create", http.HandlerFunc(api.HandleCreate))
 	http.Handle("/ws", websocket.Handler(ws.HandleRoom))
+	logging.Success.Println("Listening for /ws connections started")
 	http.Handle("/gm", websocket.Handler(ws.HandleGmConnection))
+	logging.Success.Println("Listening for /gm connections started")
 	log.Fatal(http.ListenAndServe(port, nil))
 
 }

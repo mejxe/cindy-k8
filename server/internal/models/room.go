@@ -28,11 +28,25 @@ func (room *Room) CloseConnections() {
 	logging.Info.Printf("Players cleared: 'Players: %x'", room.Players.Players)
 }
 
+// reset state and set started = true
+func (r *Room) StartGame() {
+	r.GameState.Started = true
+	r.GameState.Round = 0
+	r.GameState.NumPlayersAlive = len(GlobalRoom.Players.Players)
+	r.GameState.CurrentVote = &CityVote{}
+	ok := r.Players.AssignSyndicate(r.GameState.NumPlayersAlive)
+	if !ok {
+		logging.Error.Println("StartGame: Not enough players to start a game!")
+		return
+	}
+	r.GameState.NumSyndicateAlive = r.Players.GetSyndicateAmount()
+}
+
 // glob variables export
 var GlobalRoom *Room = &Room{
 	Players: &Players{Players: make(map[int]*Player)},
 	GameState: &GameState{
-		CurrentVote: &Vote{},
+		CurrentVote: &CityVote{},
 	},
 	ClientInChannel: make(chan ClientMessage, 10),
 	GMInChannel:     make(chan GMMessage, 2),

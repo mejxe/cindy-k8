@@ -10,24 +10,17 @@ type GameSummary struct {
 	SyndicateIDs  []int `json:"syndicate"`
 }
 type GameState struct {
-	Round           int
-	NumPlayersAlive int
-	Night           bool // is it night?
-	Started         bool
-	HoldingMic      *Player
-	RoundsBody      *DeadBody
-	CurrentVote     *Vote
+	Round             int
+	NumPlayersAlive   int
+	NumSyndicateAlive int
+	Night             bool // is it night?
+	Started           bool
+	HoldingMic        *Player
+	RoundsBody        *DeadBody
+	CurrentVote       Vote
 }
 
 // gs implementation block
-
-// reset state and set started = true
-func (g *GameState) StartGame() {
-	g.Started = true
-	g.Round = 0
-	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
-	g.CurrentVote = &Vote{}
-}
 
 // cycle through night and day
 func (g *GameState) NextTime() {
@@ -35,6 +28,11 @@ func (g *GameState) NextTime() {
 		return
 	}
 	g.Night = !g.Night
+	if g.Night {
+		g.CurrentVote = &SyndicateVote{}
+		g.CurrentVote.Init()
+		go g.CurrentVote.Start()
+	}
 }
 
 // start the next round, update NumPlayersAlive, set daytime
@@ -49,15 +47,10 @@ func (g *GameState) NextRound() {
 	g.Round++
 	g.Night = false
 	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
+	g.NumSyndicateAlive = GlobalRoom.Players.GetSyndicateAmount()
 }
 func (g *GameState) CheckWinCons() Result {
-	syndicateLeft := 0
-	println("syndicate members: ", syndicateLeft)
-	for _, p := range GlobalRoom.Players.Players {
-		if p.Syndicate {
-			syndicateLeft++
-		}
-	}
+	syndicateLeft := GlobalRoom.Players.GetSyndicateAmount()
 	if g.Night && (g.NumPlayersAlive-syndicateLeft <= syndicateLeft) {
 		return Result{finished: true, syndicateWins: true}
 	}
@@ -87,6 +80,7 @@ func (g *GameState) FinishGame(syndicateWins bool) GameSummary {
 	g.Night = false
 	g.Round = 0
 	g.NumPlayersAlive = 0
+	g.NumSyndicateAlive = 0
 	g.CurrentVote = nil
 	return gameSummary
 }

@@ -1,4 +1,5 @@
-import { ClientMessageTypes, type GameStateBody, type GMMessageType, type ParsedWSMessage, type WSMessage, type WSPlayerEliminated, type WSPlayerID, type WSPlayerInfo, type WSPlayerKicked, type WSVoteStarted, type WSVoteSummary, type WSVoteUpdate } from "../types/messageTypes"
+import type { RefObject } from "react"
+import { ClientMessageTypes, type GameStateBody, type GMMessageType, type MessageType, type ParsedWSMessage, type WSMessage, type WSPlayerEliminated, type WSPlayerID, type WSPlayerInfo, type WSPlayerKicked, type WSVoteStarted, type WSVoteSummary, type WSVoteUpdate } from "../types/messageTypes"
 import type { GameState, VoteJSONBody } from "../types/types"
 
 // TODO: Maybe make different parser for gm
@@ -60,7 +61,8 @@ export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
           type: "voteUpdate",
           body: {
             ...msgBody,
-            votes: votesMap
+            votes: votesMap,
+            alreadyVoted: new Set(msgBody.alreadyVoted)
           }
         }
       }
@@ -92,7 +94,12 @@ export function updateGameState(receivedGameState: GameStateBody, forGM: boolean
   }
   return updatedGameState
 }
-export function sendRequest(ws: WebSocket, type: GMMessageType, body: any | null) {
+export function sendRequest(ws: WebSocket, type: MessageType, body: any | null) {
   const msg: WSMessage = { type, body }
   ws.send(JSON.stringify(msg))
+}
+export function sendGSRequest(ws: WebSocket) {
+  const message: WSMessage = { type: ClientMessageTypes.GetState, body: null }
+  ws.send(JSON.stringify(message))
+  console.log("sent gs request to this ws = ", ws)
 }
