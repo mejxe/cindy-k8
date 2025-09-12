@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Login from "./Login"
 import "../../styles/form.css"
 import { defaultState, defaultVote, type GameInfo } from "../../types/types"
@@ -15,6 +15,13 @@ export default function GMPanel() {
     vote: vote,
     me: null,
   }
+  useEffect(() => {
+    if (ws == null) {
+      setGameState(defaultState)
+      setVote(defaultVote)
+    }
+  }, [ws])
+
   const toRender = () => {
     switch (verified) {
       case true: {
@@ -26,7 +33,7 @@ export default function GMPanel() {
       }
       case false: {
         return (<>
-          <Login setVerified={setVerified} setWS={setWS} setGameState={setGameState} gameState={gameState} />
+          <Login setVerified={setVerified} setWS={setWS} setGameState={setGameState} gameState={gameState} setVote={setVote} />
         </>)
       }
     }
@@ -36,3 +43,4 @@ export default function GMPanel() {
   </>)
 
 }
+

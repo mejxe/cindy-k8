@@ -87,11 +87,7 @@ export function updateGameState(receivedGameState: GameStateBody, forGM: boolean
     holdingMic: null,
     voting: false
   }
-  if (!forGM) {
-    updatedGameState.players.forEach((p) => {
-      p.syndicate = false
-    })
-  }
+  updatedGameState.players.forEach(p => { p.syndicate = p.syndicate ? p.syndicate : false })
   return updatedGameState
 }
 export function sendRequest(ws: WebSocket, type: MessageType, body: any | null) {

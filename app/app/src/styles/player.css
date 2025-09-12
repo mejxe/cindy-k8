@@ -371,6 +371,10 @@ ul#players {
     gap: 2rem 1rem;
   }
 
+  .player.me::after {
+    font-size: 0.5rem;
+  }
+
   .player {
     min-width: 90px;
     min-height: 120px;

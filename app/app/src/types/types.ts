@@ -32,7 +32,7 @@ export const defaultGameInfo: GameInfo = {
   me: null,
   vote: defaultVote,
 }
-type VoteType = "mafia" | "citizens"
+type VoteType = "syndicate" | "citizens"
 
 export type Vote = {
   voteOn: boolean

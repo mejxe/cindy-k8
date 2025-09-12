@@ -32,6 +32,9 @@ func (g *GameState) NextTime() {
 		g.CurrentVote = &SyndicateVote{}
 		g.CurrentVote.Init()
 		go g.CurrentVote.Start()
+
+	} else {
+		g.CurrentVote = &CityVote{}
 	}
 }
 

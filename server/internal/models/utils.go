@@ -49,7 +49,6 @@ func (ps *Players) Map() map[string]map[string]any {
 	return playersMap
 }
 func (ps *Players) Array() []map[string]any {
-	// TODO: FIX THE RANDOM NULL WHILE PLAYER JOINS
 	playersArray := make([]map[string]any, 0, len(ps.Players))
 	for _, p := range ps.Players {
 		playersArray = append(playersArray, p.Map())
@@ -64,9 +63,9 @@ func (ps *Players) GMMap() map[string]map[string]any {
 	}
 	return playersMap
 }
-func (ps *Players) GMArray() []map[string]any {
-	playersArray := make([]map[string]any, 0, len(ps.Players))
-	for _, p := range ps.Players {
+func UpgradeArray(ps map[int]*Player) []map[string]any {
+	playersArray := make([]map[string]any, 0, len(ps))
+	for _, p := range ps {
 		playersArray = append(playersArray, p.UpgradeMap(p.Map()))
 	}
 	return playersArray
@@ -111,7 +110,7 @@ func (r *Room) GetState() map[string]any {
 }
 func (r *Room) GetStateGM() map[string]any {
 	return map[string]any{
-		"players":   r.Players.GMArray(),
+		"players":   UpgradeArray(r.Players.Players),
 		"gameState": r.GameState.Map(),
 	}
 }

@@ -51,15 +51,18 @@ func HandleGMMessages() {
 			service.HandleNextRound()
 		case models.GMMessageShiftTime:
 			service.HandleShiftTime()
+		case models.GMMessageGetVoteInfo:
+			service.HandleGMGetVoteInfo()
 		case models.GMMessageStartVote:
 			service.HandleStartVote()
+		case models.GMMessageEndVote:
+			service.HandleEndVote()
 		}
 	}
 }
 func HandleBrodcast() {
 	// Send to everyone messages flowing through OutChannel
 	for msgToSend := range room.OutChannel {
-		logging.Info.Printf("Sending %s", msgToSend.String())
 
 		// the message
 		jsonMsg, _ := json.Marshal(msgToSend)
@@ -70,7 +73,9 @@ func HandleBrodcast() {
 
 		// send to gm
 		if room.GameMaster.Connected {
-			room.GameMaster.Connection.Write(jsonMsg)
+			if !(msgToSend.Type == models.ServerMessageSendState) {
+				room.GameMaster.Connection.Write(jsonMsg)
+			}
 			room.GameMaster.Connection.Write(GMstateMsg)
 		}
 
@@ -81,8 +86,19 @@ func HandleBrodcast() {
 			if p.Connection == nil { // skip disconnected users
 				continue
 			}
+			// if player is syndicate he gets upgraded state
+			if p.Syndicate && msgToSend.Type == models.ServerMessageSendState {
+				jsonMsg = GMstateMsg
+			}
+			if msgToSend.Type == models.ServerMessageVoteUpdate &&
+				models.GlobalRoom.GameState.CurrentVote.GetType() == models.Syndicate &&
+				!p.Syndicate {
+				p.Connection.Config().Dialer.Timeout.Minutes()
+			}
+			// TODO: Clean up deciding which messages go where
 
 			p.Connection.Write(jsonMsg)
+			//logging.Info.Printf("Sent %s", jsonMsg)
 			//		p.Connection.Write(stateMsg)
 		}
 		players.Unlock()

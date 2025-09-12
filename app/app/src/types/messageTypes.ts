@@ -39,6 +39,9 @@ export const GMMessageTypes = {
   GetState: "gsgm",
   ShiftTime: "timeshift",
   StartVote: "startVote",
+  SummarizeVote: "summarize",
+  GetVoteInfo: "gmVoteInfo",
+  EndVote: "endVote",
 } as const
 
 export const ClientMessageTypes = {
@@ -47,6 +50,7 @@ export const ClientMessageTypes = {
   Voted: "vote",
   VoteFirst: "voteFirst",
   GetMe: "getMe",
+  VoteToKill: "kill"
 } as const
 export interface WSStartedMessage {
   type: "started",

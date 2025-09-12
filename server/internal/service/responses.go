@@ -6,6 +6,7 @@ import (
 
 	"github.com/mejxe/cindy-k8/internal/logging"
 	"github.com/mejxe/cindy-k8/internal/models"
+	"golang.org/x/net/websocket"
 )
 
 // FLOW: (Modify state/Pass data to modify state) and notify user client(s)
@@ -82,7 +83,7 @@ func VotedForElimination(syndicate *models.Player, citizen *models.Player) {
 		"from": syndicate.Id,
 		"for":  citizen.Id,
 	}
-	// TODO: Send the message only to syndicate
+	// TODO: Send the message only to syndicate \\ add a type to the vote maybe and send it based on that?
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteReceived, message)
 	//citizen.Alive = false
 	//message := map[string]any{
@@ -112,14 +113,21 @@ func SummarizeVote(eliminated []*models.Player, voteAmount int) {
 }
 func SendState(to *models.Player) {
 	// called when user requested state
-	json.NewEncoder(to.Connection).Encode(models.NewServerMessage(models.ServerMessageSendState,
-		models.GlobalRoom.GetState()))
+
+	var state map[string]any
+	if to.Syndicate {
+		state = models.GlobalRoom.GetStateGM()
+	} else {
+		state = models.GlobalRoom.GetState()
+	}
+
+	json.NewEncoder(to.Connection).Encode(models.NewServerMessage(models.ServerMessageSendState, state))
 	logging.Info.Printf("SendState: Sending state to %s %s\n", to.FirstName, to.LastName)
 }
-func SendVoteInfo(to *models.Player) {
-	json.NewEncoder(to.Connection).
+func SendVoteInfo(to *websocket.Conn) {
+	json.NewEncoder(to).
 		Encode(models.NewServerMessage(models.ServerMessageVoteUpdate, models.GlobalRoom.GameState.CurrentVote.Map()))
-	logging.Info.Printf("SendVoteInfo: Sending vote info to %s %s\n", to.FirstName, to.LastName)
+	logging.Info.Printf("SendVoteInfo: Sending vote info!")
 }
 
 // Sends game state to every connected client
@@ -168,6 +176,10 @@ func ShiftTime() {
 	if !models.GlobalRoom.GameState.Started {
 		return
 	}
+	if models.GlobalRoom.GameState.CurrentVote.GetStarted() {
+		models.GlobalRoom.GameState.CurrentVote.GetChannel() <- models.SingleVote{From: nil, ForWho: nil}
+		// send stop signal if any vote is on at the time
+	}
 	models.GlobalRoom.GameState.NextTime()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
 	SendStateToEveryone()
@@ -204,4 +216,15 @@ func StartVote() {
 	vote := models.GlobalRoom.GameState.CurrentVote
 	vote.Init()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteStarted, nil)
+}
+func EndVote() {
+	logging.Info.Println("In EndVote")
+	vote := models.GlobalRoom.GameState.CurrentVote
+	vote.End()
+	message := map[string]any{
+		"eliminated":    nil,
+		"amountOfVotes": 0,
+	}
+	logging.Success.Println("EndVote: Vote aborted succesfully!")
+	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteSummary, message)
 }

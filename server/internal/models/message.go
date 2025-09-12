@@ -31,7 +31,9 @@ const (
 	GMMessageSendState           MessageType = "gsgm"
 	GMMessageShiftTime           MessageType = "timeshift"
 	GMMessageSendStateToEveryone MessageType = "gsGlobal"
+	GMMessageGetVoteInfo         MessageType = "gmVoteInfo"
 	GMMessageStartVote           MessageType = "startVote"
+	GMMessageEndVote             MessageType = "endVote"
 )
 
 // GM Manipulate Actions
@@ -113,4 +115,13 @@ func NewError(message string) ServerMessage {
 }
 func CreateStateMessage() ServerMessage {
 	return NewServerMessage(ServerMessageSendState, GlobalRoom.GetState())
+}
+
+type StateMessage struct {
+	Type MessageType
+	Body StateMessageBody
+}
+type StateMessageBody struct {
+	Players   map[int]*Player
+	GameState GameState
 }

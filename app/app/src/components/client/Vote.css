@@ -130,10 +130,10 @@
 
 .vote-count {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: linear-gradient(135deg, #ff4444, #cc0000);
-    color: white;
+    top: 140px;
+    left: 10px;
+    background: linear-gradient(135deg, #ffbd00, #ff8d00);
+    color: black;
     font-weight: bold;
     font-size: 1rem;
     width: 32px;
@@ -143,7 +143,6 @@
     align-items: center;
     justify-content: center;
     border: 2px solid #242424;
-    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
     animation: vote-pulse 1.5s ease-in-out infinite;
     z-index: 5;
 }

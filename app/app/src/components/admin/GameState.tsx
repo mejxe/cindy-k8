@@ -1,6 +1,6 @@
 import { sendRequest } from "../../services/shared";
 import { GMMessageTypes } from "../../types/messageTypes";
-import type { GameInfo, GameState } from "../../types/types";
+import type { GameInfo, GameState, Vote } from "../../types/types";
 import "./GameState.css"
 
 export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: WebSocket }) {
@@ -8,13 +8,24 @@ export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: We
   const vote = gameInfo.vote
   const night = gamestate.night ? "Nighttime" : "Daytime"
   const started = gamestate.started ? "started" : "Not started"
-  const controls = getControlState(gamestate)
+  const controls = getControlState(gamestate, vote)
 
 
-  const startVote = () => {
-    sendRequest(ws, "startVote", null)
+  const cycleVote = () => {
+    if (!vote.voteOn) {
+      sendRequest(ws, "startVote", null)
+    } else {
+      sendRequest(ws, "endVote", null)
+    }
+  }
+  const summarizeVote = () => {
+    if (vote.voteOn) {
+      sendRequest(ws, "summarize", null)
+    }
   }
 
+  // TODO: Add some info about ongoing vote, like hihglights and vote count
+  // TODO: stop vote, end vote forcefully
 
   return (<div className="game-state">
     <h1>Control Panel</h1>
@@ -37,16 +48,16 @@ export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: We
       <div className={controls.voteControl.className}>
         <h4>
           Vote Control
-          <p className={`status-indicator ${vote.voteOn ? 'status-vote-active' : 'status-vote-inactive'}`}>
-            {vote.voteOn ? "Vote is ON" : "Vote is off"}
+          <p className={controls.voteControl.toolTipClassName}>
+            {controls.voteControl.text}
           </p>
         </h4>
         <div className="vote-buttons">
-          <button onClick={startVote} className="control-btn vote-btn">
-            Start Vote
+          <button onClick={cycleVote} className={controls.voteControl.cycleVoteButton.className}>
+            {controls.voteControl.cycleVoteButton.text}
           </button>
-          <button onClick={() => { /* Handle open vote modal */ }} className="control-btn vote-btn secondary">
-            Open Vote
+          <button onClick={summarizeVote} disabled={controls.voteControl.summarizeVoteButton.disabled} className={controls.voteControl.summarizeVoteButton.className}>
+            {controls.voteControl.summarizeVoteButton.text}
           </button>
         </div>
       </div>
@@ -86,8 +97,7 @@ export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: We
   )
 }
 
-function getControlState(state: GameState) {
-  // TODO: add class names for each
+function getControlState(state: GameState, vote: Vote) {
   return {
     startControl: {
       disabled: false,
@@ -102,7 +112,18 @@ function getControlState(state: GameState) {
     },
     voteControl: {
       disabled: !state.started,
-      className: state.started ? "control-group" : "control-group disabled"
+      className: state.started ? "control-group" : "control-group disabled",
+      toolTipClassName: `status-indicator ${vote.voteOn ? 'status-vote-active' : 'status-vote-inactive'}`,
+      text: vote.voteOn ? "Vote is ON" : "Vote is OFF",
+      cycleVoteButton: {
+        text: vote.voteOn ? "Stop vote" : "Start vote",
+        className: "control-btn vote-btn"
+      },
+      summarizeVoteButton: {
+        text: "Summarize Vote Early",
+        disabled: !vote.voteOn,
+        className: vote.voteOn ? "control-btn vote-btn secondary" : "control-btn vote-btn secondary disabled"
+      }
     },
     timeControl: {
       disabled: !state.started,

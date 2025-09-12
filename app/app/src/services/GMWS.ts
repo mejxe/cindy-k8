@@ -1,10 +1,10 @@
 import type { ParsedWSMessage } from "../types/messageTypes"
-import { parseWSMessages } from "./shared.ts"
+import { parseWSMessages, sendRequest } from "./shared.ts"
 import { updateGameState } from "./shared"
-import type { GameState } from "../types/types.ts"
+import { defaultVote, type GameState } from "../types/types.ts"
 
 
-export function connectWSForGM(password: string, setVerified, setWS, setGameState, gameState) {
+export function connectWSForGM(password: string, setVerified, setWS, setGameState, gameState, setVote) {
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
@@ -21,7 +21,7 @@ export function connectWSForGM(password: string, setVerified, setWS, setGameStat
       if (msg === null) {
         return
       }
-      handleGMMessages(msg, setGameState, gameState)
+      handleGMMessages(ws, msg, setGameState, gameState, setVote)
     } catch (e) {
       console.error(e)
     }
@@ -32,7 +32,7 @@ export function connectWSForGM(password: string, setVerified, setWS, setGameStat
     setVerified(false)
   }
 }
-function handleGMMessages(message: ParsedWSMessage, setGameState, gameState: GameState) {
+function handleGMMessages(ws: WebSocket, message: ParsedWSMessage, setGameState, gameState: GameState, setVote) {
   switch (message.type) {
     case "gameState": {
       const receivedGameState = message.body
@@ -64,6 +64,27 @@ function handleGMMessages(message: ParsedWSMessage, setGameState, gameState: Gam
         }
 
       }
+      break
+    }
+    case "voteStarted": {
+      setVote(() => ({
+        ...defaultVote,
+        voteOn: true
+      })
+      )
+      break
+
+    }
+    case "voteUpdate": {
+      const newVote = message.body
+      console.log("newVote: ", message)
+      setVote(() => ({
+        ...newVote
+      }))
+      break
+    }
+    case "voteSummary": {
+      sendRequest(ws, "gmVoteInfo", null)
       break
     }
   }

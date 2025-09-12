@@ -1,21 +1,30 @@
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import type { Player } from "../../types/types";
 import "./GameScreen.css"
 import { AppContext } from "../../store/gamestate-context";
 import ClientPlayer from "./ClientPlayer";
 import VotingModal from "./Vote";
+import { useWebSocket } from "../../hooks/useWebSocket";
+import { ClientMessageTypes, type WSMessage } from "../../types/messageTypes";
+import "./Vote.css"
 
 
 export default function GameScreen() {
   const state = useContext(AppContext);
   const vote = state.vote
+  const ws = useWebSocket()
   if (state.me === null) {
     return
   }
-
-  const handlePlayerClick = (player: Player) => {
-  };
-
+  const getVoteCount = (player: Player): number => {
+    if (vote.votes.size == 0) return 0
+    const votes = vote.votes.get(player.id)
+    if (votes === undefined) {
+      console.log("Cannot correctly index player in vote count")
+      return 0
+    }
+    return votes
+  }
 
   const getPhaseText = () => {
     switch (state.gameState.night) {
@@ -32,6 +41,15 @@ export default function GameScreen() {
       default: return "#d4af37";
     }
   };
+  const voteToKill = (player: Player) => {
+    if (player.syndicate || !player.alive) {
+      return
+    }
+    if (state.gameState.night && state.me?.syndicate) {
+      const msg: WSMessage = { type: ClientMessageTypes.VoteToKill, body: { "kill": player.id } }
+      ws.sendMessage(msg)
+    }
+  }
 
   return (<div className="game-screen">
     <div className="game-header">
@@ -42,7 +60,21 @@ export default function GameScreen() {
     <div className="game-content">
       <ul id="players">
         {state.gameState.players.map((player) => {
-          return ClientPlayer(player, player.id === state.me.id)
+          if (state.gameState.night && state.me?.syndicate && !player.syndicate && player.alive) {
+            return (<div className="voting-player-container">{ClientPlayer(player, state.me,
+              () => { voteToKill(player) }, getVoteCount(player))}
+              {
+                getVoteCount(player) > 0 && (
+                  <div className="vote-count">
+                    {getVoteCount(player)}
+                  </div>
+                )
+              }</div>)
+
+
+          } else {
+            return ClientPlayer(player, state.me, null, 0)
+          }
         })}
       </ul>
       <VotingModal players={state.gameState.players} vote={vote} me={state.me} />
@@ -50,5 +82,4 @@ export default function GameScreen() {
   </div>
   )
 }
-// TODO: Voting should be a popup like in among us, that would open and close afterwards
 // TODO: Add microphone

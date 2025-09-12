@@ -89,8 +89,13 @@ func (v *CityVote) Start() {
 	votersList := v.CurrentlyVoting // currently the first Voter
 	last := false
 	for sVote := range v.VoteChannel {
-		logging.Info.Printf("Vote: Received a vote from: %d, for %d.\n", sVote.From.Id, sVote.ForWho.Id)
+		println("SVOTE: ", sVote.ForWho)
+		if sVote.From == nil {
+			logging.Info.Println("Vote: Received a stop signal, stopping vote...")
+			return
+		}
 		// receive votes and increment state
+		logging.Info.Printf("Vote: Received a vote from: %d, for %d.\n", sVote.From.Id, sVote.ForWho.Id)
 		v.Votes[sVote.ForWho]++
 		// consume the list, check if next is last
 		v.AlreadyVoted = append(v.AlreadyVoted, sVote.From.Id)
@@ -112,14 +117,11 @@ func (v *CityVote) Finish() ([]*Player, int) {
 	// finish the vote and sum up the votes
 	votedOut := make([]*Player, 0)
 	voteAmount := 0
-	logging.Error.Printf("%x", votedOut)
-	logging.Error.Printf("%x", v.Votes)
 	for _, votes := range v.Votes {
 		if votes > voteAmount {
 			voteAmount = votes
 		}
 	}
-	println("vote amount = ", voteAmount)
 	for player, votes := range v.Votes {
 		if votes == voteAmount {
 			votedOut = append(votedOut, player)
@@ -131,11 +133,21 @@ func (v *CityVote) Finish() ([]*Player, int) {
 	return votedOut, voteAmount // returns player(s) with most votes and amount of the votes
 
 }
+func (v *CityVote) End() {
+	if v.Started {
+		v.VoteChannel <- SingleVote{From: nil, ForWho: nil} // stop signal
+		v.Started = false
+		v = &CityVote{}
+	}
+}
 func (v *CityVote) GetChannel() chan SingleVote {
 	return v.VoteChannel
 }
 func (v *CityVote) GetStarted() bool {
 	return v.Started
+}
+func (v *CityVote) GetType() VoteType {
+	return City
 }
 
 // end

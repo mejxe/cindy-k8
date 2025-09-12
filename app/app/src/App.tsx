@@ -9,7 +9,6 @@ import Header from './components/client/Header'
 import GameScreen from './components/client/GameScreen'
 import { Toaster } from 'react-hot-toast'
 import { WebSocketProvider } from './services/WSProvider.tsx'
-import { sendGSRequest } from './services/shared.ts'
 
 
 export default function App() {
@@ -26,7 +25,13 @@ export default function App() {
   useEffect(() => {
     if (token === null) {
       setAppState(States.CharacterCreation)
+      setGameState(defaultState)
+      setVote(defaultVote)
+
       return
+    }
+    if (websocket.current && websocket.current.readyState !== WebSocket.CLOSED) {
+      websocket.current.close()
     }
     websocket.current = connectWS(token, setToken, setAppState, setGameState, setMe, setVote)
     console.log("WEBSOCKET CURRENT: ", websocket.current)

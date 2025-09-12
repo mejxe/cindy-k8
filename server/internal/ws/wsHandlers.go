@@ -28,8 +28,11 @@ func HandleGmConnection(ws *websocket.Conn) {
 
 	room.GameMaster.Connected = true
 	room.GameMaster.Connection = ws
-	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendState}
-	room.GMInChannel <- models.GMMessage{Type: models.GMMessageSendStateToEveryone}
+	room.GMInChannel <- models.NewGMMessage(models.GMMessageSendState, nil)
+	room.GMInChannel <- models.NewGMMessage(models.GMMessageSendStateToEveryone, nil)
+	if room.GameState.CurrentVote.GetStarted() {
+		room.GMInChannel <- models.NewGMMessage(models.GMMessageGetVoteInfo, nil)
+	}
 	buf := make([]byte, 1024)
 	for {
 		n, err := ws.Read(buf)
@@ -61,7 +64,6 @@ func HandleRoom(ws *websocket.Conn) {
 		ws.Write([]byte("Token not provided."))
 		return
 	}
-	room.Players.Lock()
 	logging.Info.Printf("New connection opened!\n")
 
 	token := ws.Request().URL.Query().Get("token")
@@ -72,8 +74,10 @@ func HandleRoom(ws *websocket.Conn) {
 	if identity == nil {
 		logging.Error.Println("User token does not match any character tokens.")
 		json.NewEncoder(ws).Encode(models.NewError("Invalid token for this session."))
+		ws.Close()
 		return
 	}
+	room.Players.Lock()
 
 	identity.Connection = ws
 

@@ -3,7 +3,6 @@ import { ClientMessageTypes, type GameStateMessage, type ParsedWSMessage, type W
 import { defaultState, defaultVote, States, type GameState, type Player, type StateKeys, type Vote } from "../types/types"
 import { parseWSMessages, sendGSRequest, sendRequest, updateGameState } from "./shared"
 import toast from "react-hot-toast"
-import PlayerList from "../components/admin/PlayerList"
 
 
 export function handleWSMessages(message: ParsedWSMessage,
@@ -34,6 +33,7 @@ export function handleWSMessages(message: ParsedWSMessage,
     case "error": {
       console.error(message.body.message)
       clear()
+      setToken(null)
       break
     }
     case "gameState": {
@@ -169,6 +169,10 @@ export function handleWSMessages(message: ParsedWSMessage,
     case "voteSummary": {
       const result = message.body
       setGameState(prevState => {
+        if (result.eliminated === null) {
+          toast("Vote aborted by GameMaster!")
+          return prevState
+        }
 
         if (result.eliminated.length > 1) {
           const msg = result.eliminated.map((val) => {
@@ -194,7 +198,6 @@ export function handleWSMessages(message: ParsedWSMessage,
         toast(`${player.firstName} ${player.lastName} is eliminated with ${result.amountOfVotes} vote(s). Goodbye!`, {})
         return {
           ...prevState,
-          night: true,
           players: updatedPlayers
         }
       })
@@ -202,6 +205,7 @@ export function handleWSMessages(message: ParsedWSMessage,
         ...defaultVote,
       }))
       break
+      sendGSRequest(websocket)
     }
   }
 }
@@ -213,7 +217,7 @@ export function connectWS(token: string, setToken: Dispatch<string | null>,
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
-  const ws = new WebSocket(`http://${host}:8080/ws?token=${token}`)
+  const ws = new WebSocket(`ws://${host}:8080/ws?token=${token}`)
   ws.onopen = () => {
     console.log("Ws connected.")
     AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote)

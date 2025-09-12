@@ -15,7 +15,7 @@ type SyndicateVote struct {
 }
 
 func (v *SyndicateVote) Init() {
-	v.VoteChannel = make(chan SingleVote)
+	v.VoteChannel = make(chan SingleVote, 2)
 	v.Votes = make(map[*Player]int)
 	for _, player := range GlobalRoom.Players.Players {
 		if player.Syndicate || !player.Alive {
@@ -29,7 +29,14 @@ func (v *SyndicateVote) Init() {
 func (v *SyndicateVote) Start() {
 	// start the vote loop
 	// TODO: ADD A TIMER THAT WILL STOP THE VOTE AFTER ~ 20s
+	GlobalRoom.OutChannel <- NewServerMessage(ServerMessageVoteUpdate, v.Map())
 	for sVote := range v.VoteChannel {
+		println("SVOTE: ", sVote.ForWho)
+		if sVote.From == nil {
+			logging.Info.Println("Vote: Received a stop signal, stopping vote...")
+			return
+		}
+
 		if slices.Contains(v.AlreadyVoted, sVote.From.Id) || !sVote.From.Syndicate {
 			continue
 		}
@@ -69,9 +76,19 @@ func (v *SyndicateVote) Finish() ([]*Player, int) {
 	return votedOut, voteAmount // returns player(s) with most votes and amount of the votes
 
 }
+func (v *SyndicateVote) End() {
+	if v.Started {
+		v.VoteChannel <- SingleVote{From: nil, ForWho: nil}
+		v.Started = false
+		v = &SyndicateVote{}
+	}
+}
 func (v *SyndicateVote) GetChannel() chan SingleVote {
 	return v.VoteChannel
 }
 func (v *SyndicateVote) GetStarted() bool {
 	return v.Started
+}
+func (v *SyndicateVote) GetType() VoteType {
+	return Syndicate
 }

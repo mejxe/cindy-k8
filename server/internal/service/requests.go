@@ -46,19 +46,18 @@ func HandlePassMic(msg models.ClientMessage) {
 }
 func HandleEliminateVote(msg models.ClientMessage) {
 	vote, ok := models.GlobalRoom.GameState.CurrentVote.(*models.SyndicateVote)
-	if (!ok) || vote.GetStarted() {
-		logging.Error.Printf("HandleEliminate: The vote is not on.")
+	if (!ok) || !vote.GetStarted() {
+		logging.Error.Printf("HandleEliminateVote: The vote is not on.")
 		return
 	}
 	// called when player wants to kill another player
 	perpetrator := msg.Author
-	votedRaw := msg.Body["kill"].(string)
-	votedID, err := strconv.Atoi(votedRaw)
-	if err != nil {
-		logging.Error.Printf("Error: Incorrect request body %s.", err.Error())
+	votedID, ok := msg.Body["kill"].(float64)
+	if !ok {
+		logging.Error.Printf("HandleEliminateVote: Incorrect request body.")
 		return
 	}
-	votedPlayer, ok := models.GlobalRoom.Players.Players[votedID]
+	votedPlayer, ok := models.GlobalRoom.Players.Players[int(votedID)]
 	if !ok {
 		logging.Error.Println("Error: Incorrect player id in HandleEliminate.")
 		return
@@ -67,12 +66,12 @@ func HandleEliminateVote(msg models.ClientMessage) {
 }
 func HandleVoteFirst(msg models.ClientMessage) {
 	// called when player presses the vote first button
-	vote, ok := models.GlobalRoom.GameState.CurrentVote.(*models.CityVote)
-
-	if !ok {
+	if models.GlobalRoom.GameState.CurrentVote.GetType() != models.City {
 		logging.Error.Printf("HandleVoteFirst: Incorrect vote type.")
 		return
 	}
+	vote := models.GlobalRoom.GameState.CurrentVote.(*models.CityVote)
+
 	if !vote.GetStarted() || vote.CurrentlyVoting != nil {
 		// if the vote is not on or the player is already voting decline the request
 		logging.Error.Println("HandleVoteFirst: Vote already started or there is someone currently voting")
@@ -104,7 +103,10 @@ func HandleSendState(msg models.ClientMessage) {
 }
 func HandleGetVoteInfo(msg models.ClientMessage) {
 	to := msg.Author
-	SendVoteInfo(to)
+	if models.GlobalRoom.GameState.CurrentVote.GetType() == models.Syndicate && !to.Syndicate {
+		return
+	}
+	SendVoteInfo(to.Connection)
 }
 
 // GM
@@ -118,6 +120,9 @@ func HandleSendGMState() {
 		return
 	}
 	SendGMState()
+}
+func HandleGMGetVoteInfo() {
+	SendVoteInfo(models.GlobalRoom.GameMaster.Connection)
 }
 func HandleManipulate(msg models.GMMessage) {
 	rawID, ok := msg.Body["playerID"]
@@ -161,6 +166,15 @@ func HandleVoteSummary(msg models.GMMessage) {
 func HandleStartGame() {
 	// called when GM requests the game to start
 	StartGame()
+}
+func HandleEndVote() {
+	if !models.GlobalRoom.GameState.Started || !models.GlobalRoom.GameState.CurrentVote.GetStarted() {
+		logging.Error.Println("HandleEndVote: Game or vote is not on.")
+		return
+	}
+	logging.Info.Println("In HandleEndVote")
+	EndVote()
+
 }
 func HandleEndGame(msg models.GMMessage) {
 	// called automatically when the game ends / or by gm to end the game early

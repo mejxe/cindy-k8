@@ -17,7 +17,7 @@ export default function VotingModal({
   const showVoteFirstButton = true
   const websocket = useWebSocket()
 
-  if (!vote.voteOn) {
+  if (!vote.voteOn || vote.type == "syndicate") {
     return
   }
 
@@ -64,7 +64,6 @@ export default function VotingModal({
             <button
               className="vote-first-btn"
               onClick={voteFirst}
-              // SOMETHING IS WRONG WITH THAT?
               disabled={hasVoted || vote.currentlyVoting !== null}
             >
               I want to vote first
@@ -76,9 +75,9 @@ export default function VotingModal({
           <div className="players-voting-grid">
             {players.map((player) => (
               <div key={player.id} className={getVotingClasses(player)}>
-                {ClientPlayer(player, player.id === me.id)}
+                {ClientPlayer(player, me, null)}
 
-                {getVoteCount(player) && (
+                {getVoteCount(player) > 0 && (
                   <div className="vote-count">
                     {getVoteCount(player)}
                   </div>
