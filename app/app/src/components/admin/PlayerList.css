@@ -1,0 +1,103 @@
+.player .voteCount {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: black;
+    background: linear-gradient(135deg, #ffbd00, #ff8d00);
+    font-weight: bold;
+    font-size: 1.2rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: vote-pulse 1.5s ease-in-out infinite;
+    z-index: 5;
+}
+
+.player.voting {
+    border: 3px solid #ff6b35;
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(255, 107, 53, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    animation: voting-pulse2 1.5s ease-in-out infinite alternate;
+}
+
+.player.voting::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.6), transparent);
+}
+
+.player.voting:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.4),
+        0 0 25px rgba(255, 107, 53, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 107, 53, 0.7);
+}
+
+.player.alreadyVoted {
+    border: 2px solid #8b7355;
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        0 0 10px rgba(139, 115, 85, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 3px rgba(139, 115, 85, 0.2);
+    background: linear-gradient(145deg, #2a2520 0%, #242424 30%, #2d2822 70%, #1f1f1f 100%);
+}
+
+.player.alreadyVoted::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(139, 115, 85, 0.6), transparent);
+}
+
+.player.alreadyVoted:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(139, 115, 85, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 3px rgba(139, 115, 85, 0.3);
+    border-color: rgba(139, 115, 85, 0.7);
+}
+
+@keyframes vote-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes voting-pulse2 {
+    0% {
+        box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.3),
+            0 0 15px rgba(255, 107, 53, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    100% {
+        box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.3),
+            0 0 25px rgba(255, 107, 53, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+}

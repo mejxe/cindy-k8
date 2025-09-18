@@ -24,8 +24,6 @@ export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: We
     }
   }
 
-  // TODO: Add some info about ongoing vote, like hihglights and vote count
-  // TODO: stop vote, end vote forcefully
 
   return (<div className="game-state">
     <h1>Control Panel</h1>
