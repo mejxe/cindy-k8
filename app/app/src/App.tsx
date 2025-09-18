@@ -32,23 +32,25 @@ export default function App() {
     }
     websocket.current = connectWS(setup.data.token, setup.setters.setToken, setup.setters.setAppState,
       GameInfoHandle.setters.setGameState,
-      GameInfoHandle.setters.setMe, GameInfoHandle.setters.setVote)
+      GameInfoHandle.setters.setMe, GameInfoHandle.setters.setVote, setup.setters.setTimer)
     console.log("WEBSOCKET CURRENT: ", websocket.current)
     localStorage.setItem("token", setup.data.token)
-  }, [setup.data.websocket, setup.data.token, setup.setters, GameInfoHandle.setters])
+  }, [setup.data.token])
 
 
   const toRender = () => {
     const appState = setup.data.appState
     switch (appState) {
       case States.Loading: {
+        // TODO: change this to role assign screen
+        // TODO: add smooth transitions between states
         return <><Header state={appState} /><main><h1>Loading...</h1></main></>
       };
       case States.CharacterCreation: {
         return <><Header state={appState} /><main><CharacterForm setToken={setup.setters.setToken} /></main></>;
       }
       case States.Lobby: {
-        return <><Header state={appState} /><main><Lobby /></main></>;
+        return <><Header state={appState} /><main><Lobby time={setup.data.timer} /></main></>;
       }
       case States.Game: {
         return <GameScreen />

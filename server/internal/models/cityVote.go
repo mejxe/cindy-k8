@@ -58,8 +58,8 @@ func (v *CityVote) CreateVotersList(firstVoter *Player) {
 	defer GlobalRoom.Players.Unlock()
 
 	keys := make([]int, 0, len(GlobalRoom.Players.Players))
-	for k := range GlobalRoom.Players.Players {
-		if k == firstVoter.Id {
+	for k, p := range GlobalRoom.Players.Players {
+		if p == firstVoter || !p.Alive || p.Connection == nil {
 			continue
 		}
 		keys = append(keys, k)

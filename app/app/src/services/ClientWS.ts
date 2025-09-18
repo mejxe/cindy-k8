@@ -1,4 +1,4 @@
-import type { Dispatch, RefObject, SetStateAction } from "react"
+import { useEffect, type Dispatch, type RefObject, type SetStateAction } from "react"
 import { ClientMessageTypes, type GameStateMessage, type ParsedWSMessage, type WSMessage } from "../types/messageTypes"
 import { defaultState, defaultVote, States, type GameState, type Player, type StateKeys, type Vote } from "../types/types"
 import { parseWSMessages, sendGSRequest, sendRequest, updateGameState } from "./shared"
@@ -11,7 +11,8 @@ export function handleWSMessages(message: ParsedWSMessage,
   setToken,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<SetStateAction<Player | null>>,
-  setVote: Dispatch<SetStateAction<Vote>>
+  setVote: Dispatch<SetStateAction<Vote>>,
+  setTimer: Dispatch<number>
 ) {
   console.log(message.type)
   if (websocket === null) {
@@ -53,9 +54,17 @@ export function handleWSMessages(message: ParsedWSMessage,
       break
     }
     case "started": {
-      setAppState(States.Game)
-      sendGSRequest(websocket)
-      sendRequest(websocket, ClientMessageTypes.GetMe, null)
+      let time = 5
+      setTimer(time)
+      const timer = setInterval(() => {
+        time -= 1
+        setTimer(time)
+        if (time <= 0) {
+          clearInterval(timer)
+          sendGSRequest(websocket)
+          sendRequest(websocket, ClientMessageTypes.GetMe, null)
+        }
+      }, 1000)
       break
     }
     case "playerInfo": {
@@ -213,14 +222,14 @@ export function connectWS(token: string, setToken: Dispatch<string | null>,
   setAppState: Dispatch<StateKeys>,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<Player | null>,
-  setVote: Dispatch<Vote>): WebSocket {
+  setVote: Dispatch<Vote>, setTimer: Dispatch<number>): WebSocket {
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
   const ws = new WebSocket(`ws://${host}:8080/ws?token=${token}`)
   ws.onopen = () => {
     console.log("Ws connected.")
-    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote)
+    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote, setTimer)
     sendGSRequest(ws)
   }
   ws.onclose = () => {
@@ -234,7 +243,8 @@ export function AttachClientMessageHandler(ws: WebSocket,
   setToken: Dispatch<string | null>,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<Player | null>,
-  setVote: Dispatch<Vote>
+  setVote: Dispatch<Vote>,
+  setTimer: Dispatch<number>
 
 ) {
   ws.onmessage = (event) => {
@@ -243,7 +253,7 @@ export function AttachClientMessageHandler(ws: WebSocket,
       if (msg === null) {
         return
       }
-      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote)
+      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote, setTimer)
     } catch (e) {
       console.error(e)
     }
