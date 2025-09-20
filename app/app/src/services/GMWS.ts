@@ -40,7 +40,7 @@ function handleGMMessages(ws: WebSocket, message: ParsedWSMessage, setGameState,
         return
       }
       console.log(receivedGameState)
-      const newgs = updateGameState(receivedGameState, true)
+      const newgs = updateGameState(receivedGameState)
       console.log(`new gs: ${newgs}`)
       setGameState(newgs)
       break

@@ -1,0 +1,32 @@
+div {
+    margin: auto;
+    padding: none;
+}
+
+.hidden {
+    filter: blur(20px) sepia(1);
+}
+
+.role-spoiler {
+    text-transform: capitalize;
+}
+
+.syndicate {
+    color: red;
+}
+
+.citizen {
+    color: blue;
+}
+
+button {
+    margin-top: 1rem;
+    padding: 1rem;
+    font-size: 1rem;
+    width: 30vw;
+    border-radius: 15px;
+    text-transform: capitalize;
+    border: none;
+    box-shadow: 0 1px 10px black;
+    background: linear-gradient(135deg, #242424 0%, #2a2520 50%, #242424 100%);
+}

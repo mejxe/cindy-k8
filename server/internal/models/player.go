@@ -52,7 +52,7 @@ func (ps *Players) AssignSyndicate(playersAlive int) (ok bool) {
 	defer ps.Unlock()
 	syndicateAmount := 0
 	if playersAlive < 7 {
-		syndicateAmount = 2
+		syndicateAmount = 1
 		//ok = false //TODO: uncomment
 		//return
 	} else if playersAlive <= 10 {

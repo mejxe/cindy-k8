@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast'
 import { WebSocketProvider } from './services/WSProvider.tsx'
 import { useGameInfo } from './hooks/useGameInfo.ts'
 import { useSetup } from './hooks/useSetup.ts'
+import RoleReveal from './components/client/RoleReveal.tsx'
 
 
 export default function App() {
@@ -41,11 +42,7 @@ export default function App() {
   const toRender = () => {
     const appState = setup.data.appState
     switch (appState) {
-      case States.Loading: {
-        // TODO: change this to role assign screen
-        // TODO: add smooth transitions between states
-        return <><Header state={appState} /><main><h1>Loading...</h1></main></>
-      };
+      // TODO: add smooth transitions between states
       case States.CharacterCreation: {
         return <><Header state={appState} /><main><CharacterForm setToken={setup.setters.setToken} /></main></>;
       }
@@ -53,7 +50,7 @@ export default function App() {
         return <><Header state={appState} /><main><Lobby time={setup.data.timer} /></main></>;
       }
       case States.Game: {
-        return <GameScreen />
+        return setup.data.roleRevealed ? <GameScreen /> : <RoleReveal setRoleRevealed={setup.setters.setRoleRevealed} />
       }
     }
   }

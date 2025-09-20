@@ -77,7 +77,7 @@ export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
     return null
   }
 }
-export function updateGameState(receivedGameState: GameStateBody, forGM: boolean): GameState {
+export function updateGameState(receivedGameState: GameStateBody): GameState {
   const updatedGameState: GameState = {
     players: receivedGameState.players,
     round: receivedGameState.gameState.round,

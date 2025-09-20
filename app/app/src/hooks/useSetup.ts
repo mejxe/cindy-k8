@@ -6,18 +6,21 @@ export function useSetup() {
     const websocket = useRef<WebSocket | null>(null)
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
     const [timer, setTimer] = useState<number>(0)
+    const [roleRevealed, setRoleRevealed] = useState(false)
     return {
         data: {
             appState,
             token,
             websocket,
-            timer
+            timer,
+            roleRevealed,
 
         },
         setters: {
             setAppState,
             setToken,
-            setTimer
+            setTimer,
+            setRoleRevealed,
         }
     }
 }
