@@ -418,7 +418,7 @@
         width: 28px;
         height: 28px;
         font-size: 0.9rem;
-        top: 8px;
+        top: 100px;
         right: 8px;
     }
 
@@ -494,11 +494,11 @@
     }
 
     .vote-count {
-        width: 24px;
-        height: 24px;
-        font-size: 0.8rem;
-        top: 6px;
-        right: 6px;
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+        top: 80px;
+        right: 10px;
     }
 
     .vote-btn {

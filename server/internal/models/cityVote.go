@@ -125,7 +125,6 @@ func (v *CityVote) Finish() ([]*Player, int) {
 	for player, votes := range v.Votes {
 		if votes == voteAmount {
 			votedOut = append(votedOut, player)
-			logging.Error.Printf("voted out = %x", votedOut)
 		}
 	}
 	v.Started = false

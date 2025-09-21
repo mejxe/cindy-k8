@@ -93,7 +93,7 @@ func HandleBrodcast() {
 			if msgToSend.Type == models.ServerMessageVoteUpdate &&
 				models.GlobalRoom.GameState.CurrentVote.GetType() == models.Syndicate &&
 				!p.Syndicate {
-				p.Connection.Config().Dialer.Timeout.Minutes()
+				continue
 			}
 			// TODO: Clean up deciding which messages go where
 

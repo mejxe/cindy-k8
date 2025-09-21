@@ -162,6 +162,7 @@ func EndGame(msg models.GMMessage) {
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageEnd, summary.Map())
 	time.Sleep(100 * time.Millisecond)
 	models.GlobalRoom.CloseConnections()
+	models.GlobalRoom.GMInChannel <- models.NewGMMessage(models.GMMessageSendState, nil)
 }
 func NextRound() {
 	if !models.GlobalRoom.GameState.Started {
@@ -182,6 +183,7 @@ func ShiftTime() {
 	}
 	models.GlobalRoom.GameState.NextTime()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
+	models.GlobalRoom.GameState.CheckWinCons()
 	SendStateToEveryone()
 }
 func KickPlayer(player *models.Player) {

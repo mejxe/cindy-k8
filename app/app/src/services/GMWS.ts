@@ -1,7 +1,7 @@
 import type { ParsedWSMessage } from "../types/messageTypes"
 import { parseWSMessages, sendRequest } from "./shared.ts"
 import { updateGameState } from "./shared"
-import { defaultVote, type GameState } from "../types/types.ts"
+import { defaultState, defaultVote, type GameState } from "../types/types.ts"
 
 
 export function connectWSForGM(password: string, setVerified, setWS, setGameState, gameState, setVote) {
@@ -74,6 +74,11 @@ function handleGMMessages(ws: WebSocket, message: ParsedWSMessage, setGameState,
       )
       break
 
+    }
+    case "ended": {
+      setVote(defaultVote)
+      setGameState(defaultState)
+      break
     }
     case "voteUpdate": {
       const newVote = message.body

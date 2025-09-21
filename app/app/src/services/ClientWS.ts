@@ -12,7 +12,8 @@ export function handleWSMessages(message: ParsedWSMessage,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<SetStateAction<Player | null>>,
   setVote: Dispatch<SetStateAction<Vote>>,
-  setTimer: Dispatch<number>
+  setTimer: Dispatch<number>,
+  setRoleRevealed: Dispatch<boolean>
 ) {
   console.log(message.type)
   if (websocket === null) {
@@ -27,6 +28,7 @@ export function handleWSMessages(message: ParsedWSMessage,
     setGameState(defaultState)
     setAppState(States.CharacterCreation)
     setVote(defaultVote)
+    setRoleRevealed(false)
     localStorage.clear()
 
   }
@@ -43,7 +45,7 @@ export function handleWSMessages(message: ParsedWSMessage,
         return
       }
 
-      setGameState(updateGameState(receivedGameState, false))
+      setGameState(updateGameState(receivedGameState))
       if (receivedGameState.gameState.started) {
         setAppState(States.Game)
       }
@@ -169,7 +171,6 @@ export function handleWSMessages(message: ParsedWSMessage,
     }
     case "voteUpdate": {
       const newVote = message.body
-      console.log("newVote: ", message)
       setVote(() => ({
         ...newVote
       }))
@@ -180,7 +181,7 @@ export function handleWSMessages(message: ParsedWSMessage,
       setGameState(prevState => {
         if (result.eliminated === null) {
           toast("Vote aborted by GameMaster!")
-          return prevState
+          return { ...prevState, started: false }
         }
 
         if (result.eliminated.length > 1) {
@@ -194,19 +195,20 @@ export function handleWSMessages(message: ParsedWSMessage,
           })
           msg.join(", ")
           toast(`The vote is tied! ${msg} all have ${result.amountOfVotes} vote(s)`, {})
-          return prevState
+          return { ...prevState, started: false }
         }
 
         const updatedPlayers = [...prevState.players]
         const player = updatedPlayers.find(p => p.id === result.eliminated[0])
         if (player === undefined) {
           console.error("Vote Summary: Player is null")
-          return prevState
+          return { ...prevState, started: false }
         }
         player.alive = false
         toast(`${player.firstName} ${player.lastName} is eliminated with ${result.amountOfVotes} vote(s). Goodbye!`, {})
         return {
           ...prevState,
+          started: false,
           players: updatedPlayers
         }
       })
@@ -222,14 +224,15 @@ export function connectWS(token: string, setToken: Dispatch<string | null>,
   setAppState: Dispatch<StateKeys>,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<Player | null>,
-  setVote: Dispatch<Vote>, setTimer: Dispatch<number>): WebSocket {
+  setVote: Dispatch<Vote>, setTimer: Dispatch<number>,
+  setRoleRevealed: Dispatch<boolean>): WebSocket {
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
   const ws = new WebSocket(`ws://${host}:8080/ws?token=${token}`)
   ws.onopen = () => {
     console.log("Ws connected.")
-    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote, setTimer)
+    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote, setTimer, setRoleRevealed)
     sendGSRequest(ws)
   }
   ws.onclose = () => {
@@ -244,7 +247,8 @@ export function AttachClientMessageHandler(ws: WebSocket,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<Player | null>,
   setVote: Dispatch<Vote>,
-  setTimer: Dispatch<number>
+  setTimer: Dispatch<number>,
+  setRoleRevelead: Dispatch<boolean>
 
 ) {
   ws.onmessage = (event) => {
@@ -253,7 +257,7 @@ export function AttachClientMessageHandler(ws: WebSocket,
       if (msg === null) {
         return
       }
-      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote, setTimer)
+      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote, setTimer, setRoleRevelead)
     } catch (e) {
       console.error(e)
     }

@@ -1,4 +1,4 @@
-div {
+.role-reveal {
     margin: auto;
     padding: none;
 }
@@ -19,7 +19,7 @@ div {
     color: blue;
 }
 
-button {
+.role-reveal button {
     margin-top: 1rem;
     padding: 1rem;
     font-size: 1rem;

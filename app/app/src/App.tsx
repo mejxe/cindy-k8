@@ -33,7 +33,7 @@ export default function App() {
     }
     websocket.current = connectWS(setup.data.token, setup.setters.setToken, setup.setters.setAppState,
       GameInfoHandle.setters.setGameState,
-      GameInfoHandle.setters.setMe, GameInfoHandle.setters.setVote, setup.setters.setTimer)
+      GameInfoHandle.setters.setMe, GameInfoHandle.setters.setVote, setup.setters.setTimer, setup.setters.setRoleRevealed)
     console.log("WEBSOCKET CURRENT: ", websocket.current)
     localStorage.setItem("token", setup.data.token)
   }, [setup.data.token])

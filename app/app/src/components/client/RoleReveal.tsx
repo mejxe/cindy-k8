@@ -8,7 +8,7 @@ export default function RoleReveal({ setRoleRevealed }: { setRoleRevealed: Dispa
   const [shown, setShown] = useState(false)
   const buttonText = !shown ? "Show Role" : "Join game"
   return (
-    <div>
+    <div className="role-reveal">
       <h1>You are a <a className={`role-spoiler${shown ? ` ${role}` : " hidden"}`}>{role}</a>.</h1>
       <button onClick={() => {
         if (shown) {
