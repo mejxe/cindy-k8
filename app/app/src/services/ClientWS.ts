@@ -1,8 +1,9 @@
 import { useEffect, type Dispatch, type RefObject, type SetStateAction } from "react"
 import { ClientMessageTypes, type GameStateMessage, type ParsedWSMessage, type WSMessage } from "../types/messageTypes"
-import { defaultState, defaultVote, States, type GameState, type Player, type StateKeys, type Vote } from "../types/types"
+import { defaultState, defaultSummary, defaultVote, States, type GameState, type Player, type StateKeys, type Summary, type Vote } from "../types/types"
 import { parseWSMessages, sendGSRequest, sendRequest, updateGameState } from "./shared"
 import toast from "react-hot-toast"
+import type { CountdownTimer } from "../hooks/useTimer"
 
 
 export function handleWSMessages(message: ParsedWSMessage,
@@ -12,8 +13,9 @@ export function handleWSMessages(message: ParsedWSMessage,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<SetStateAction<Player | null>>,
   setVote: Dispatch<SetStateAction<Vote>>,
-  setTimer: Dispatch<number>,
-  setRoleRevealed: Dispatch<boolean>
+  Timer: CountdownTimer,
+  setRoleRevealed: Dispatch<boolean>,
+  setSummary: Dispatch<Summary>,
 ) {
   console.log(message.type)
   if (websocket === null) {
@@ -56,17 +58,10 @@ export function handleWSMessages(message: ParsedWSMessage,
       break
     }
     case "started": {
-      let time = 5
-      setTimer(time)
-      const timer = setInterval(() => {
-        time -= 1
-        setTimer(time)
-        if (time <= 0) {
-          clearInterval(timer)
-          sendGSRequest(websocket)
-          sendRequest(websocket, ClientMessageTypes.GetMe, null)
-        }
-      }, 1000)
+      Timer.callIn5Seconds(() => {
+        sendGSRequest(websocket)
+        sendRequest(websocket, ClientMessageTypes.GetMe, null)
+      })
       break
     }
     case "playerInfo": {
@@ -195,6 +190,10 @@ export function handleWSMessages(message: ParsedWSMessage,
           })
           msg.join(", ")
           toast(`The vote is tied! ${msg} all have ${result.amountOfVotes} vote(s)`, {})
+          setSummary({ ...defaultSummary, playerKilled: null, summaryOn: true })
+          Timer.callIn5Seconds(() => {
+            setSummary(defaultSummary)
+          })
           return { ...prevState, started: false }
         }
 
@@ -206,6 +205,10 @@ export function handleWSMessages(message: ParsedWSMessage,
         }
         player.alive = false
         toast(`${player.firstName} ${player.lastName} is eliminated with ${result.amountOfVotes} vote(s). Goodbye!`, {})
+        setSummary({ ...defaultSummary, playerKilled: player, summaryOn: true })
+        Timer.callIn5Seconds(() => {
+          setSummary(defaultSummary)
+        })
         return {
           ...prevState,
           started: false,
@@ -224,15 +227,17 @@ export function connectWS(token: string, setToken: Dispatch<string | null>,
   setAppState: Dispatch<StateKeys>,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<Player | null>,
-  setVote: Dispatch<Vote>, setTimer: Dispatch<number>,
-  setRoleRevealed: Dispatch<boolean>): WebSocket {
+  setVote: Dispatch<Vote>,
+  setTimer: CountdownTimer,
+  setRoleRevealed: Dispatch<boolean>,
+  setSummary: Dispatch<Summary>,): WebSocket {
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
   const ws = new WebSocket(`ws://${host}:8080/ws?token=${token}`)
   ws.onopen = () => {
     console.log("Ws connected.")
-    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote, setTimer, setRoleRevealed)
+    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote, setTimer, setRoleRevealed, setSummary)
     sendGSRequest(ws)
   }
   ws.onclose = () => {
@@ -247,8 +252,9 @@ export function AttachClientMessageHandler(ws: WebSocket,
   setGameState: Dispatch<SetStateAction<GameState>>,
   setMe: Dispatch<Player | null>,
   setVote: Dispatch<Vote>,
-  setTimer: Dispatch<number>,
-  setRoleRevelead: Dispatch<boolean>
+  setTimer: CountdownTimer,
+  setRoleRevelead: Dispatch<boolean>,
+  setSummary: Dispatch<Summary>,
 
 ) {
   ws.onmessage = (event) => {
@@ -257,7 +263,7 @@ export function AttachClientMessageHandler(ws: WebSocket,
       if (msg === null) {
         return
       }
-      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote, setTimer, setRoleRevelead)
+      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote, setTimer, setRoleRevelead, setSummary)
     } catch (e) {
       console.error(e)
     }

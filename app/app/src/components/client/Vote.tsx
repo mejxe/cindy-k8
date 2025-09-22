@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import './Vote.css';
+import './css/Vote.css';
 import type { Player, Vote } from '../../types/types';
 import ClientPlayer from './ClientPlayer';
 import { useWebSocket } from '../../hooks/useWebSocket';

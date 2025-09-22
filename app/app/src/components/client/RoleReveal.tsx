@@ -1,6 +1,6 @@
 import { useContext, useState, type Dispatch, type SetStateAction } from "react"
 import { AppContext } from "../../store/gamestate-context"
-import "./RoleReveal.css"
+import "./css/RoleReveal.css"
 
 export default function RoleReveal({ setRoleRevealed }: { setRoleRevealed: Dispatch<SetStateAction<boolean>> }) {
   const state = useContext(AppContext)

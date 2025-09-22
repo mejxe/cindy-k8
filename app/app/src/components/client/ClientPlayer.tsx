@@ -1,5 +1,5 @@
 import type { Player } from "../../types/types";
-import "./GameScreen.css"
+import "./css/GameScreen.css"
 
 export default function ClientPlayer(player: Player, me: Player, handlerFunc) {
   const getClasses = () => {

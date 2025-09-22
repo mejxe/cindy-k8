@@ -32,7 +32,16 @@ export const defaultGameInfo: GameInfo = {
   me: null,
   vote: defaultVote,
 }
+
+export const defaultSummary: Summary = {
+  playerKilled: null,
+  summaryOn: false
+}
 type VoteType = "syndicate" | "citizens"
+export type Summary = {
+  playerKilled: Player | null
+  summaryOn: boolean
+}
 
 export type Vote = {
   voteOn: boolean

@@ -1,18 +1,20 @@
-import { useContext } from "react";
-import type { Player } from "../../types/types";
-import "./GameScreen.css"
+import { useContext, useState } from "react";
+import { defaultSummary, type Player, type Summary } from "../../types/types";
+import "./css/GameScreen.css"
 import { AppContext } from "../../store/gamestate-context";
 import ClientPlayer from "./ClientPlayer";
 import VotingModal from "./Vote";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { ClientMessageTypes, type WSMessage } from "../../types/messageTypes";
-import "./Vote.css"
+import "./css/Vote.css"
+import RoundSummary from "./RoundSummary";
 
 
-export default function GameScreen() {
+export default function GameScreen({ summary, timer }: { summary: Summary, timer: number }) {
   const state = useContext(AppContext);
   const vote = state.vote
   const ws = useWebSocket()
+
   if (state.me === null) {
     return
   }
@@ -42,7 +44,7 @@ export default function GameScreen() {
     }
   };
   const voteToKill = (player: Player) => {
-    if (player.syndicate || !player.alive) {
+    if (player.syndicate || !player.alive || !state.me?.alive) {
       return
     }
     if (state.gameState.night && state.me?.syndicate) {
@@ -62,22 +64,22 @@ export default function GameScreen() {
         {state.gameState.players.map((player) => {
           if (state.gameState.night && state.me?.syndicate && !player.syndicate && player.alive) {
             return (<div className="voting-player-container">{ClientPlayer(player, state.me,
-              () => { voteToKill(player) }, getVoteCount(player))}
+              () => { voteToKill(player) })}
               {
                 getVoteCount(player) > 0 && (
                   <div className="vote-count">
                     {getVoteCount(player)}
                   </div>
                 )
-              }</div>)
-
-
+              }
+            </div>)
           } else {
-            return ClientPlayer(player, state.me, null, 0)
+            return ClientPlayer(player, state.me, null)
           }
         })}
       </ul>
       <VotingModal players={state.gameState.players} vote={vote} me={state.me} />
+      <RoundSummary summary={summary} time={timer} />
     </div>
   </div>
   )

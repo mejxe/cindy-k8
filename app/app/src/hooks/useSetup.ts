@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { States, type StateKeys } from "../types/types"
+import { defaultSummary, States, type StateKeys, type Summary } from "../types/types"
 
 export function useSetup() {
     const [appState, setAppState] = useState<StateKeys>(States.Lobby)
@@ -7,6 +7,7 @@ export function useSetup() {
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
     const [timer, setTimer] = useState<number>(0)
     const [roleRevealed, setRoleRevealed] = useState(false)
+    const [summary, setSummary] = useState<Summary>(defaultSummary)
     return {
         data: {
             appState,
@@ -14,6 +15,7 @@ export function useSetup() {
             websocket,
             timer,
             roleRevealed,
+            summary
 
         },
         setters: {
@@ -21,6 +23,7 @@ export function useSetup() {
             setToken,
             setTimer,
             setRoleRevealed,
+            setSummary
         }
     }
 }
