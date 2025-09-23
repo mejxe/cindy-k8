@@ -178,8 +178,9 @@ func ShiftTime() {
 		return
 	}
 	if models.GlobalRoom.GameState.CurrentVote.GetStarted() {
-		models.GlobalRoom.GameState.CurrentVote.GetChannel() <- models.SingleVote{From: nil, ForWho: nil}
-		// send stop signal if any vote is on at the time
+		models.GlobalRoom.GameState.CurrentVote.End()
+		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteUpdate,
+			models.GlobalRoom.GameState.CurrentVote.Map())
 	}
 	models.GlobalRoom.GameState.NextTime()
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)

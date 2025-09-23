@@ -16,6 +16,9 @@ export default function VotingModal({
   const hasVoted = vote.alreadyVoted.has(me.id)
   const showVoteFirstButton = true
   const websocket = useWebSocket()
+  if (vote.votes.size > 0) {
+    console.log(players[[...vote.votes.entries()].reduce((p, n) => p[1] > n[1] ? p : n)[0]])
+  }
 
   if (!vote.voteOn || vote.type == "syndicate") {
     return
@@ -53,6 +56,14 @@ export default function VotingModal({
       body: null
     }
     websocket.sendMessage(msg)
+  }
+  const getLeadingInVotes = (): Player | null => {
+    const mostVotes = Math.max(...vote.votes.values())
+    console.log(mostVotes)
+    const matchingVotes = [...vote.votes.entries()].filter(value => value[1] == mostVotes)
+    console.log(matchingVotes)
+    if (matchingVotes.length > 1) return null
+    return players.find(p => p.id === matchingVotes[0][0])
   }
   return (
     <div className="voting-modal-overlay">
@@ -97,14 +108,13 @@ export default function VotingModal({
           </div>
 
           <div className="voting-actions">
-            {hasVoted && (
-              <div className="vote-confirmation">
-                {selectedVote ?
-                  `You voted for ${players.find(p => p.id === selectedVote)?.firstName} ${players.find(p => p.id === selectedVote)?.lastName}` :
-                  'You skipped this vote'
-                }
-              </div>
-            )}
+            <div className="vote-confirmation">
+
+              {vote.votes.size > 0 && getLeadingInVotes()
+                ? `${getLeadingInVotes()?.firstName} has the most votes.`
+                : "There is a tie!"
+              }
+            </div>
           </div>
         </div>
       </div>

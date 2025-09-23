@@ -74,9 +74,9 @@ func HandleBrodcast() {
 		// send to gm
 		if room.GameMaster.Connected {
 			if !(msgToSend.Type == models.ServerMessageSendState) {
-				room.GameMaster.Connection.Write(jsonMsg)
+				models.GlobalRoom.GameMaster.Connection.Write(jsonMsg)
 			}
-			room.GameMaster.Connection.Write(GMstateMsg)
+			models.GlobalRoom.GameMaster.Connection.Write(GMstateMsg)
 		}
 
 		// send to players

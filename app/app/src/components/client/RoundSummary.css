@@ -1,0 +1,127 @@
+.roundSummary {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    padding: 2rem;
+    font-family: "Intel One Mono", sans-serif;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.roundSummary h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 0 0 1.5rem;
+    text-align: center;
+    color: #d4af37;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.playerKilled {
+    background: linear-gradient(135deg, #242424 0%, #2a2520 50%, #242424 100%);
+    border: 2px solid #504B38;
+    border-radius: 15px;
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    max-width: 400px;
+    width: 100%;
+}
+
+.playerKilled h2 {
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    margin: 0 0 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: normal;
+}
+
+.playerKilled .voting-player-container,
+.playerKilled .player {
+    margin: 1rem auto 1.5rem;
+    max-width: 180px;
+}
+
+.roundSummary h3 {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    margin: 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: normal;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(80, 75, 56, 0.3);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .roundSummary {
+        padding: 1.5rem 1rem;
+    }
+
+    .roundSummary h1 {
+        margin-bottom: 1rem;
+    }
+
+    .playerKilled {
+        padding: 1.5rem;
+        max-width: 90%;
+        border-radius: 12px;
+    }
+
+    .playerKilled h2 {
+        margin-bottom: 1rem;
+    }
+
+    .roundSummary h3 {
+        margin-top: 1.5rem;
+        padding: 0.8rem 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .roundSummary {
+        padding: 1rem 0.5rem;
+    }
+
+    .playerKilled {
+        padding: 1rem;
+    }
+
+    .playerKilled .voting-player-container,
+    .playerKilled .player {
+        max-width: 150px;
+    }
+
+    .roundSummary h3 {
+        padding: 0.7rem 1rem;
+        margin-top: 1rem;
+    }
+}
+
+/* Landscape orientation on phones */
+@media (max-width: 896px) and (orientation: landscape) and (max-height: 500px) {
+    .roundSummary {
+        padding: 1rem;
+    }
+
+    .roundSummary h1 {
+        margin-bottom: 0.8rem;
+    }
+
+    .playerKilled {
+        padding: 1rem;
+        margin: 0.8rem 0;
+    }
+
+    .roundSummary h3 {
+        margin-top: 1rem;
+        padding: 0.6rem 1rem;
+    }
+}
