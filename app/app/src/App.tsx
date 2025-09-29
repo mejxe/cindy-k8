@@ -12,31 +12,26 @@ import { WebSocketProvider } from './services/WSProvider.tsx'
 import { useGameInfo } from './hooks/useGameInfo.ts'
 import { useSetup } from './hooks/useSetup.ts'
 import RoleReveal from './components/client/RoleReveal.tsx'
-import useTimer from './hooks/useTimer.ts'
 
 
 export default function App() {
 
   const setup = useSetup()
   const GameInfoHandle = useGameInfo()
-  const Timer = useTimer()
 
   useEffect(() => {
     const websocket = setup.data.websocket
+
     if (setup.data.token === null) {
       setup.setters.setAppState(States.CharacterCreation)
-      GameInfoHandle.setters.setGameState(defaultState)
-      GameInfoHandle.setters.setVote(defaultVote)
-
       return
     }
+
     if (websocket.current && websocket.current.readyState !== WebSocket.CLOSED) {
       websocket.current.close()
     }
-    websocket.current = connectWS(setup.data.token, setup.setters.setToken, setup.setters.setAppState,
-      GameInfoHandle.setters.setGameState,
-      GameInfoHandle.setters.setMe, GameInfoHandle.setters.setVote, Timer, setup.setters.setRoleRevealed, setup.setters.setSummary)
-    console.log("WEBSOCKET CURRENT: ", websocket.current)
+
+    websocket.current = connectWS(setup, GameInfoHandle)
     localStorage.setItem("token", setup.data.token)
   }, [setup.data.token])
 
@@ -44,15 +39,14 @@ export default function App() {
   const toRender = () => {
     const appState = setup.data.appState
     switch (appState) {
-      // TODO: add smooth transitions between states
       case States.CharacterCreation: {
-        return <><Header state={appState} /><main><CharacterForm setToken={setup.setters.setToken} /></main></>;
+        return <><Header state={appState} /><main><CharacterForm gameSummary={setup.gameSummary} setToken={setup.setters.setToken} /></main></>;
       }
       case States.Lobby: {
-        return <><Header state={appState} /><main><Lobby time={Timer.timer} /></main></>;
+        return <><Header state={appState} /><main><Lobby time={setup.timer.timer} /></main></>;
       }
       case States.Game: {
-        return setup.data.roleRevealed ? <GameScreen summary={setup.data.summary} timer={Timer.timer} /> : <RoleReveal setRoleRevealed={setup.setters.setRoleRevealed} />
+        return setup.data.roleRevealed ? <GameScreen summary={setup.data.summary} timer={setup.timer.timer} /> : <RoleReveal setRoleRevealed={setup.setters.setRoleRevealed} />
       }
     }
   }

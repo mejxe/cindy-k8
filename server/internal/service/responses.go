@@ -182,9 +182,14 @@ func ShiftTime() {
 		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteUpdate,
 			models.GlobalRoom.GameState.CurrentVote.Map())
 	}
-	models.GlobalRoom.GameState.NextTime()
-	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
 	models.GlobalRoom.GameState.CheckWinCons()
+	if models.GlobalRoom.GameState.Night {
+		models.GlobalRoom.GameState.NextRound()
+		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNextRound, nil)
+	} else {
+		models.GlobalRoom.GameState.NextTime()
+		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
+	}
 	SendStateToEveryone()
 }
 func KickPlayer(player *models.Player) {

@@ -2,7 +2,7 @@ import { useContext } from "react"
 import type { Summary } from "../../types/types"
 import ClientPlayer from "./ClientPlayer"
 import { AppContext } from "../../store/gamestate-context"
-import "./RoundSummary.css"
+import "./css/RoundSummary.css"
 // TODO: ADD CSS
 
 export default function RoundSummary({ summary, time }: { summary: Summary, time: number }) {
@@ -12,7 +12,7 @@ export default function RoundSummary({ summary, time }: { summary: Summary, time
   const night = state.gameState.night
 
   const getTimeOfDayText = (night: boolean): string => {
-    return state.gameState.night ? "Day" : "Night"
+    return night ? "Day" : "Night"
 
   }
   const render = () => {

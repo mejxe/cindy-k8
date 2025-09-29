@@ -106,6 +106,11 @@ func HandleGetVoteInfo(msg models.ClientMessage) {
 	if models.GlobalRoom.GameState.CurrentVote.GetType() == models.Syndicate && !to.Syndicate {
 		return
 	}
+	if to.Connection == nil {
+		logging.Error.Println("HandleGetVoteInfo: Connection to the requester is not established.")
+		return
+	}
+	//TODO: crashes when the game ends with the vote.
 	SendVoteInfo(to.Connection)
 }
 

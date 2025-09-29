@@ -37,7 +37,19 @@ export const defaultSummary: Summary = {
   playerKilled: null,
   summaryOn: false
 }
+
 type VoteType = "syndicate" | "citizens"
+
+export type GameSummary = {
+  syndicateWins: boolean,
+  syndicates: Player[],
+  gameSummaryOn: boolean,
+  setGameSummaryOn: Dispatch<SetStateAction<boolean>>
+}
+export type GameSummaryData = {
+  syndicateWins: boolean,
+  syndicates: Player[]
+}
 export type Summary = {
   playerKilled: Player | null
   summaryOn: boolean

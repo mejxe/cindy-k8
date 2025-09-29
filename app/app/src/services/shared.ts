@@ -1,5 +1,5 @@
 import type { RefObject } from "react"
-import { ClientMessageTypes, type GameStateBody, type GMMessageType, type MessageType, type ParsedWSMessage, type WSMessage, type WSPlayerEliminated, type WSPlayerID, type WSPlayerInfo, type WSPlayerKicked, type WSVoteStarted, type WSVoteSummary, type WSVoteUpdate } from "../types/messageTypes"
+import { ClientMessageTypes, type GameStateBody, type GMMessageType, type MessageType, type ParsedWSMessage, type WSEndedMessage, type WSMessage, type WSPlayerEliminated, type WSPlayerID, type WSPlayerInfo, type WSPlayerKicked, type WSVoteStarted, type WSVoteSummary, type WSVoteUpdate } from "../types/messageTypes"
 import type { GameState, VoteJSONBody } from "../types/types"
 
 // TODO: Maybe make different parser for gm
@@ -32,10 +32,7 @@ export function parseWSMessages(jsonString: string): ParsedWSMessage | null {
         return message as WSPlayerInfo
       }
       case "ended": {
-        return {
-          type: "ended",
-          body: "result"
-        }
+        return message as WSEndedMessage
       }
       case "pkilled": {
         return message as WSPlayerEliminated

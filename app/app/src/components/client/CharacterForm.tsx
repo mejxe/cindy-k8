@@ -1,7 +1,13 @@
 import type { Dispatch, SetStateAction } from "react"
 import "../../styles/form.css"
+import GameSummary from "./GameSummary"
+import type { GameSummary as GameSummaryHandle } from "../../types/types"
 
-export default function CharacterForm({ setToken }: { setToken: Dispatch<SetStateAction<string | null>> }) {
+export default function CharacterForm({ setToken, gameSummary }:
+  {
+    setToken: Dispatch<SetStateAction<string | null>>,
+    gameSummary: GameSummaryHandle
+  }) {
 
   async function sendFormData(formData: FormData) {
     const params = new URLSearchParams()
@@ -62,6 +68,7 @@ export default function CharacterForm({ setToken }: { setToken: Dispatch<SetStat
       </div>
       <button>Join the game</button>
     </form>
+    <GameSummary gameSummaryHandle={gameSummary} />
   </>
 }
 

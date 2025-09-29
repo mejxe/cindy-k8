@@ -25,6 +25,12 @@ export interface GameStateBody {
     started: boolean,
   }
 }
+export interface GameSummaryRaw {
+  syndicates: [number],
+  playersLeft: number,
+  syndicateWins: boolean
+
+}
 export interface WSErrorMessage {
   type: "error",
   body: {
@@ -58,7 +64,7 @@ export interface WSStartedMessage {
 }
 export interface WSEndedMessage {
   type: "ended",
-  body: "result"
+  body: GameSummaryRaw
 }
 export interface WSPlayerInfo {
   type: "playerInfo",

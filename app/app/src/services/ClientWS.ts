@@ -1,23 +1,15 @@
-import { useEffect, type Dispatch, type RefObject, type SetStateAction } from "react"
-import { ClientMessageTypes, type GameStateMessage, type ParsedWSMessage, type WSMessage } from "../types/messageTypes"
-import { defaultState, defaultSummary, defaultVote, States, type GameState, type Player, type StateKeys, type Summary, type Vote } from "../types/types"
+import { ClientMessageTypes, type ParsedWSMessage } from "../types/messageTypes"
+import { defaultState, defaultSummary, defaultVote, States, type GameSummary, type Player } from "../types/types"
 import { parseWSMessages, sendGSRequest, sendRequest, updateGameState } from "./shared"
 import toast from "react-hot-toast"
-import type { CountdownTimer } from "../hooks/useTimer"
+import type { Setup } from "../hooks/useSetup"
+import type { GameInfoHandle } from "../hooks/useGameInfo"
 
 
-export function handleWSMessages(message: ParsedWSMessage,
-  setAppState,
-  websocket: WebSocket | null,
-  setToken,
-  setGameState: Dispatch<SetStateAction<GameState>>,
-  setMe: Dispatch<SetStateAction<Player | null>>,
-  setVote: Dispatch<SetStateAction<Vote>>,
-  Timer: CountdownTimer,
-  setRoleRevealed: Dispatch<boolean>,
-  setSummary: Dispatch<Summary>,
-) {
-  console.log(message.type)
+export function handleWSMessages(message: ParsedWSMessage, setup: Setup, gameInfoHandle: GameInfoHandle) {
+  let websocket = setup.data.websocket.current
+  console.log("message in wsmessages: ", message)
+  console.log("Players in handlewsmsgs", gameInfoHandle.gameInfo.gameState.players)
   if (websocket === null) {
     console.log("null socket wtf?")
     return
@@ -27,10 +19,10 @@ export function handleWSMessages(message: ParsedWSMessage,
       websocket.close()
     }
     websocket = null
-    setGameState(defaultState)
-    setAppState(States.CharacterCreation)
-    setVote(defaultVote)
-    setRoleRevealed(false)
+    gameInfoHandle.setters.setGameState(defaultState)
+    setup.setters.setAppState(States.CharacterCreation)
+    gameInfoHandle.setters.setVote(defaultVote)
+    setup.setters.setRoleRevealed(false)
     localStorage.clear()
 
   }
@@ -38,7 +30,7 @@ export function handleWSMessages(message: ParsedWSMessage,
     case "error": {
       console.error(message.body.message)
       clear()
-      setToken(null)
+      setup.setters.setToken(null)
       break
     }
     case "gameState": {
@@ -47,18 +39,18 @@ export function handleWSMessages(message: ParsedWSMessage,
         return
       }
 
-      setGameState(updateGameState(receivedGameState))
+      gameInfoHandle.setters.setGameState(updateGameState(receivedGameState))
       if (receivedGameState.gameState.started) {
-        setAppState(States.Game)
+        setup.setters.setAppState(States.Game)
       }
       else {
-        setAppState(States.Lobby)
+        setup.setters.setAppState(States.Lobby)
       }
 
       break
     }
     case "started": {
-      Timer.callIn5Seconds(() => {
+      setup.timer.callIn5Seconds(() => {
         sendGSRequest(websocket)
         sendRequest(websocket, ClientMessageTypes.GetMe, null)
       })
@@ -68,7 +60,7 @@ export function handleWSMessages(message: ParsedWSMessage,
       switch (message.body.action) {
         case "connected": {
           const players = message.body.players
-          setGameState(prevState => ({
+          gameInfoHandle.setters.setGameState(prevState => ({
             ...prevState,
             players: players
           }))
@@ -76,7 +68,7 @@ export function handleWSMessages(message: ParsedWSMessage,
         }
         case "disconnected": {
           const playerID = message.body.player
-          setGameState(prevState => {
+          gameInfoHandle.setters.setGameState(prevState => {
             const updatedPlayers = [...prevState.players]
             const player = updatedPlayers.find(p => p.id === playerID)
             if (player === undefined) {
@@ -96,7 +88,7 @@ export function handleWSMessages(message: ParsedWSMessage,
     }
     case "pkilled": {
       const playerID = message.body.whoDied
-      setGameState(prevState => {
+      gameInfoHandle.setters.setGameState(prevState => {
         const updatedPlayers = [...prevState.players]
         const player = updatedPlayers.find(p => p.id === playerID)
         if (player === undefined) {
@@ -113,7 +105,7 @@ export function handleWSMessages(message: ParsedWSMessage,
     }
     case "kicked": {
       const playerID = message.body.who
-      setMe(prevMe => {
+      gameInfoHandle.setters.setMe(prevMe => {
         if (prevMe === null) return null
         if (prevMe.id === playerID) {
           toast.error("You have been kicked.", {
@@ -124,12 +116,12 @@ export function handleWSMessages(message: ParsedWSMessage,
             },
           })
           clear()
-          setToken(null)
+          setup.setters.setToken(null)
           return null
         }
         return prevMe
       })
-      setGameState(prevState => {
+      gameInfoHandle.setters.setGameState(prevState => {
         const updatedPlayers = [...prevState.players]
         const player = updatedPlayers.find(p => p.id === playerID)
         if (player === undefined) {
@@ -145,13 +137,29 @@ export function handleWSMessages(message: ParsedWSMessage,
       break
     }
     case "ended": {
-      console.log("clearing cache")
+      let syndicates: Player[] = []
+      console.log(message.body)
+      gameInfoHandle.setters.setGameState(prevState => {
+        console.log("the state in setter ", prevState.players)
+        //message.body
+        //  .syndicates
+        //  .forEach(val => {
+        //    const player = (prevState.players.find(p => p.id === val))
+        //    if (player !== undefined) {
+        //      syndicatePlayers.push(player)
+        //    }
+        //  })
+        syndicates = message.body.syndicates.map(id => prevState.players.find(p => p.id === id)).filter(p => p !== undefined)
+        setup.setters.setGameSummaryData({ syndicates, syndicateWins: message.body.syndicateWins })
+        setup.gameSummary.setGameSummaryOn(true)
+        return prevState
+      })
       clear()
-      setToken(null)
+      setup.setters.setToken(null)
       break
     }
     case "voteStarted": {
-      setVote(() => ({
+      gameInfoHandle.setters.setVote(() => ({
         ...defaultVote,
         voteOn: true
       })
@@ -161,19 +169,19 @@ export function handleWSMessages(message: ParsedWSMessage,
     }
     case "id": {
       const me: Player = message.body
-      setMe(me)
+      gameInfoHandle.setters.setMe(me)
       break
     }
     case "voteUpdate": {
       const newVote = message.body
-      setVote(() => ({
+      gameInfoHandle.setters.setVote(() => ({
         ...newVote
       }))
       break
     }
     case "voteSummary": {
       const result = message.body
-      setGameState(prevState => {
+      gameInfoHandle.setters.setGameState(prevState => {
         if (result.eliminated === null) {
           toast("Vote aborted by GameMaster!")
           return { ...prevState, started: false }
@@ -189,10 +197,9 @@ export function handleWSMessages(message: ParsedWSMessage,
             return player.firstName + " " + player.lastName
           })
           msg.join(", ")
-          toast(`The vote is tied! ${msg} all have ${result.amountOfVotes} vote(s)`, {})
-          setSummary({ ...defaultSummary, playerKilled: null, summaryOn: true })
-          Timer.callIn5Seconds(() => {
-            setSummary(defaultSummary)
+          setup.setters.setSummary({ ...defaultSummary, playerKilled: null, summaryOn: true })
+          setup.timer.callIn5Seconds(() => {
+            setup.setters.setSummary(defaultSummary)
           })
           return { ...prevState, started: false }
         }
@@ -204,10 +211,9 @@ export function handleWSMessages(message: ParsedWSMessage,
           return { ...prevState, started: false }
         }
         player.alive = false
-        toast(`${player.firstName} ${player.lastName} is eliminated with ${result.amountOfVotes} vote(s). Goodbye!`, {})
-        setSummary({ ...defaultSummary, playerKilled: player, summaryOn: true })
-        Timer.callIn5Seconds(() => {
-          setSummary(defaultSummary)
+        setup.setters.setSummary({ ...defaultSummary, playerKilled: player, summaryOn: true })
+        setup.timer.callIn5Seconds(() => {
+          setup.setters.setSummary(defaultSummary)
         })
         return {
           ...prevState,
@@ -215,7 +221,7 @@ export function handleWSMessages(message: ParsedWSMessage,
           players: updatedPlayers
         }
       })
-      setVote(() => ({
+      gameInfoHandle.setters.setVote(() => ({
         ...defaultVote,
       }))
       break
@@ -223,52 +229,42 @@ export function handleWSMessages(message: ParsedWSMessage,
     }
   }
 }
-export function connectWS(token: string, setToken: Dispatch<string | null>,
-  setAppState: Dispatch<StateKeys>,
-  setGameState: Dispatch<SetStateAction<GameState>>,
-  setMe: Dispatch<Player | null>,
-  setVote: Dispatch<Vote>,
-  setTimer: CountdownTimer,
-  setRoleRevealed: Dispatch<boolean>,
-  setSummary: Dispatch<Summary>,): WebSocket {
+export function connectWS(
+  setup: Setup,
+  gameInfoHandle: GameInfoHandle
+): WebSocket {
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
-  const ws = new WebSocket(`ws://${host}:8080/ws?token=${token}`)
+  const ws = new WebSocket(`ws://${host}:8080/ws?token=${setup.data.token}`)
   ws.onopen = () => {
     console.log("Ws connected.")
-    AttachClientMessageHandler(ws, setAppState, setToken, setGameState, setMe, setVote, setTimer, setRoleRevealed, setSummary)
+    AttachClientMessageHandler(setup, gameInfoHandle)
     sendGSRequest(ws)
   }
   ws.onclose = () => {
     console.log("Ws disconnected")
-    setToken(null)
+    setup.setters.setToken(null)
   }
   return ws
 }
-export function AttachClientMessageHandler(ws: WebSocket,
-  setAppState: Dispatch<StateKeys>,
-  setToken: Dispatch<string | null>,
-  setGameState: Dispatch<SetStateAction<GameState>>,
-  setMe: Dispatch<Player | null>,
-  setVote: Dispatch<Vote>,
-  setTimer: CountdownTimer,
-  setRoleRevelead: Dispatch<boolean>,
-  setSummary: Dispatch<Summary>,
-
+export function AttachClientMessageHandler(
+  setup: Setup,
+  gameInfoHandle: GameInfoHandle
+  //TODO: Stale reference to gameinfo here
 ) {
-  ws.onmessage = (event) => {
+  if (setup.data.websocket.current == null) return
+  setup.data.websocket.current.onmessage = (event) => {
     try {
       const msg = parseWSMessages(event.data)
       if (msg === null) {
         return
       }
-      handleWSMessages(msg, setAppState, ws, setToken, setGameState, setMe, setVote, setTimer, setRoleRevelead, setSummary)
+      const gmInfoData = gameInfoHandle.gameInfo
+      handleWSMessages(msg, setup, { ...gameInfoHandle, gameInfo: gmInfoData })
     } catch (e) {
       console.error(e)
     }
   }
-  console.log("attached the ws")
-  console.log(ws)
 }
 

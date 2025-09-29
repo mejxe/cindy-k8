@@ -124,7 +124,7 @@ func (s *GameSummary) Map() map[string]any {
 	return map[string]any{
 		"playersLeft":   s.PlayersLeft,
 		"syndicateWins": s.SyndicateWins,
-		"syndicate":     s.SyndicateIDs,
+		"syndicates":    s.SyndicateIDs,
 	}
 }
 func (v *CityVote) Map() map[string]any {
