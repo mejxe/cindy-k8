@@ -1,8 +1,12 @@
 package models
 
+import (
+	"github.com/mejxe/cindy-k8/internal/logging"
+)
+
 type Result struct {
-	finished      bool
-	syndicateWins bool
+	Finished      bool
+	SyndicateWins bool
 }
 type GameSummary struct {
 	SyndicateWins bool  `json:"syndicateWins"`
@@ -27,6 +31,11 @@ func (g *GameState) NextTime() {
 	if !g.Started {
 		return
 	}
+	g.UpdatePlayerNumbers()
+	res := g.CheckWinCons()
+	if res.Finished {
+		GlobalRoom.GMInChannel <- NewGMMessage(GMMessageEnd, map[string]any{"syndicateWins": res.SyndicateWins})
+	}
 	g.Night = !g.Night
 	if g.Night {
 		g.CurrentVote = &SyndicateVote{}
@@ -43,25 +52,31 @@ func (g *GameState) NextRound() {
 	if !g.Started || !g.Night {
 		return
 	}
+	g.UpdatePlayerNumbers()
 	res := g.CheckWinCons()
-	if res.finished {
-		GlobalRoom.GMInChannel <- NewGMMessage(GMMessageEnd, map[string]any{"syndicateWins": res.syndicateWins})
+	if res.Finished {
+		GlobalRoom.GMInChannel <- NewGMMessage(GMMessageEnd, map[string]any{"syndicateWins": res.SyndicateWins})
 	}
 	g.Round++
 	g.Night = false
-	g.NumPlayersAlive = len(GlobalRoom.Players.Players)
-	g.NumSyndicateAlive = GlobalRoom.Players.GetSyndicateAmount()
 }
 func (g *GameState) CheckWinCons() Result {
-	syndicateLeft := GlobalRoom.Players.GetSyndicateAmount()
-	if g.Night && (g.NumPlayersAlive-syndicateLeft <= syndicateLeft) {
-		return Result{finished: true, syndicateWins: true}
+	logging.Info.Printf("Checking win conditions: NumPlayersAlive:%d; NumSyndicateAlive:%d\n", g.NumPlayersAlive, g.NumSyndicateAlive)
+	if g.NumPlayersAlive-g.NumSyndicateAlive <= g.NumSyndicateAlive {
+		return Result{Finished: true, SyndicateWins: true}
 	}
-	if syndicateLeft < 1 {
-		return Result{finished: true, syndicateWins: false}
+	if g.NumSyndicateAlive < 1 {
+		return Result{Finished: true, SyndicateWins: false}
 	}
 
-	return Result{finished: false}
+	return Result{Finished: false}
+}
+func (g *GameState) UpdatePlayerNumbers() {
+	logging.Info.Println("UpdatePlayerNumbers: Updated the numbers.")
+	GlobalRoom.Players.Lock()
+	defer GlobalRoom.Players.Unlock()
+	g.NumPlayersAlive = GlobalRoom.Players.GetAlivePlayersAmount()
+	g.NumSyndicateAlive = GlobalRoom.Players.GetSyndicateAmount()
 }
 
 // end the game
@@ -84,6 +99,6 @@ func (g *GameState) FinishGame(syndicateWins bool) GameSummary {
 	g.Round = 0
 	g.NumPlayersAlive = 0
 	g.NumSyndicateAlive = 0
-	g.CurrentVote = nil
+	g.CurrentVote = &CityVote{}
 	return gameSummary
 }

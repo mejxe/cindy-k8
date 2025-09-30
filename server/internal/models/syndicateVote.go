@@ -31,7 +31,6 @@ func (v *SyndicateVote) Start() {
 	// TODO: ADD A TIMER THAT WILL STOP THE VOTE AFTER ~ 20s
 	GlobalRoom.OutChannel <- NewServerMessage(ServerMessageVoteUpdate, v.Map())
 	for sVote := range v.VoteChannel {
-		println("SVOTE: ", sVote.ForWho)
 		if sVote.From == nil {
 			logging.Info.Println("Vote: Received a stop signal, stopping vote...")
 			return
@@ -72,7 +71,7 @@ func (v *SyndicateVote) Finish() ([]*Player, int) {
 		}
 	}
 	v.Started = false
-	v = nil
+	v = &SyndicateVote{}
 	return votedOut, voteAmount // returns player(s) with most votes and amount of the votes
 
 }

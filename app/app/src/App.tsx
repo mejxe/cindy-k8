@@ -12,12 +12,15 @@ import { WebSocketProvider } from './services/WSProvider.tsx'
 import { useGameInfo } from './hooks/useGameInfo.ts'
 import { useSetup } from './hooks/useSetup.ts'
 import RoleReveal from './components/client/RoleReveal.tsx'
+import useWakeLock from './hooks/useWakeLock.ts'
 
 
 export default function App() {
 
   const setup = useSetup()
   const GameInfoHandle = useGameInfo()
+  const wakeLock = useWakeLock()
+  wakeLock.wakelockRequest()
 
   useEffect(() => {
     const websocket = setup.data.websocket

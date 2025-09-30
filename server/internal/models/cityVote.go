@@ -89,7 +89,6 @@ func (v *CityVote) Start() {
 	votersList := v.CurrentlyVoting // currently the first Voter
 	last := false
 	for sVote := range v.VoteChannel {
-		println("SVOTE: ", sVote.ForWho)
 		if sVote.From == nil {
 			logging.Info.Println("Vote: Received a stop signal, stopping vote...")
 			return
@@ -128,7 +127,7 @@ func (v *CityVote) Finish() ([]*Player, int) {
 		}
 	}
 	v.Started = false
-	v = nil
+	v = &CityVote{}
 	return votedOut, voteAmount // returns player(s) with most votes and amount of the votes
 
 }

@@ -2,9 +2,13 @@ import type { Player } from "../../types/types";
 import "./css/GameScreen.css"
 
 export default function ClientPlayer(player: Player, me: Player, handlerFunc) {
+  let avatarCircle = player.firstName.at(0) + player.lastName.at(0)
   const getClasses = () => {
     let classes = "player"
-    if (player.id === me.id) classes += " me"
+    if (player.id === me.id) {
+      classes += " me"
+      avatarCircle = "ME"
+    }
     if (!player.alive) classes += " dead"
     if (!player.connected) classes += " disconnected"
     if (player.alive && !player.syndicate && me.syndicate) classes += " killable"
@@ -15,7 +19,7 @@ export default function ClientPlayer(player: Player, me: Player, handlerFunc) {
       <li key={player.id} onClick={handlerFunc} className={getClasses()}>
         <div className="player-avatar">
           <div className="avatar-circle">
-            {player.firstName.at(0)}{player.lastName.at(0)}
+            {avatarCircle}
           </div>
         </div>
         <div className="citizenName">

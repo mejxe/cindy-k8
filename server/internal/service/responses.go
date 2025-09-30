@@ -94,20 +94,23 @@ func VotedForElimination(syndicate *models.Player, citizen *models.Player) {
 
 func SummarizeVote(eliminated []*models.Player, voteAmount int) {
 	// called when vote ends
+	models.GlobalRoom.Players.Lock()
 	elimIds := make([]int, 0)
 	for _, elim := range eliminated {
 		if !elim.Alive {
-			break
+			continue
 		}
 		elimIds = append(elimIds, elim.Id)
 		if len(eliminated) == 1 {
 			elim.Alive = false
+			logging.Info.Printf("SummarizeVote: %s %s was eliminated.\n", elim.FirstName, elim.LastName)
 		}
 	}
 	message := map[string]any{
 		"eliminated":    elimIds,
 		"amountOfVotes": voteAmount,
 	}
+	models.GlobalRoom.Players.Unlock()
 	models.GlobalRoom.GMInChannel <- models.NewGMMessage(models.GMMessageShiftTime, nil)
 	models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteSummary, message)
 }
@@ -182,7 +185,7 @@ func ShiftTime() {
 		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageVoteUpdate,
 			models.GlobalRoom.GameState.CurrentVote.Map())
 	}
-	models.GlobalRoom.GameState.CheckWinCons()
+
 	if models.GlobalRoom.GameState.Night {
 		models.GlobalRoom.GameState.NextRound()
 		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNextRound, nil)

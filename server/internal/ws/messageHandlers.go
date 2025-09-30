@@ -63,7 +63,7 @@ func HandleGMMessages() {
 func HandleBrodcast() {
 	// Send to everyone messages flowing through OutChannel
 	for msgToSend := range room.OutChannel {
-
+		logging.Info.Printf("Brodcasting: %s", msgToSend.Type)
 		// the message
 		jsonMsg, _ := json.Marshal(msgToSend)
 
@@ -81,9 +81,8 @@ func HandleBrodcast() {
 
 		// send to players
 		players.Lock()
-		logging.Warning.Println("Locking players in brodcast.")
 		for _, p := range players.Players {
-			if p.Connection == nil { // skip disconnected users
+			if p == nil || p.Connection == nil { // skip disconnected users
 				continue
 			}
 			// if player is syndicate he gets upgraded state
@@ -102,6 +101,5 @@ func HandleBrodcast() {
 			//		p.Connection.Write(stateMsg)
 		}
 		players.Unlock()
-		logging.Warning.Println("Unlocked players in brodcast.")
 	}
 }

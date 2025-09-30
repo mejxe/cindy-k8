@@ -22,7 +22,6 @@ func (room *Room) CloseConnections() {
 			p.Connection.Close()
 		}
 	}
-	room.Players.Players = nil
 	room.Players.Players = make(map[int]*Player)
 	logging.Warning.Println("Game ended, disconnecting players....")
 	logging.Info.Printf("Players cleared: 'Players: %x'", room.Players.Players)
@@ -49,6 +48,6 @@ var GlobalRoom *Room = &Room{
 		CurrentVote: &CityVote{},
 	},
 	ClientInChannel: make(chan ClientMessage, 10),
-	GMInChannel:     make(chan GMMessage, 2),
+	GMInChannel:     make(chan GMMessage, 3),
 	OutChannel:      make(chan ServerMessage, 10),
 }

@@ -27,7 +27,7 @@ export default function RoundSummary({ summary, time }: { summary: Summary, time
         </div>
       )
     }
-    else if (player.id !== state.me.id) {
+    else if (player.id === state.me.id) {
       return (
         <div className="roundSummary">
           <h1>{getTimeOfDayText(night)} ended.</h1>

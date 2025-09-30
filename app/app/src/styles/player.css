@@ -240,7 +240,7 @@ ul#players {
 }
 
 .player.me .avatar-circle {
-  background: linear-gradient(135deg, #d4af37, #f4d03f);
+  background: linear-gradient(135deg, rgba(245, 255, 61, 1) 0%, rgba(232, 232, 100, 1) 18%, rgba(237, 183, 83, 1) 100%);
   box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
   position: relative;
 }
@@ -251,8 +251,8 @@ ul#players {
   left: -3px;
   width: 6px;
   height: 6px;
-  background: #d4af37;
   border-radius: 50%;
+  background: linear-gradient(135deg, rgba(245, 255, 61, 1) 0%, rgba(232, 232, 100, 1) 18%, rgba(237, 183, 83, 1) 100%);
   border: 2px solid #000;
   animation: pulse-gold 1.5s ease-in-out infinite;
 }
@@ -266,7 +266,7 @@ ul#players {
 }
 
 .player.me .avatar-circle {
-  background: linear-gradient(135deg, #d4af37, #f4d03f);
+  background: linear-gradient(135deg, rgba(245, 255, 61, 1) 0%, rgba(232, 232, 100, 1) 18%, rgba(237, 183, 83, 1) 100%);
   box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
 }
 

@@ -100,7 +100,7 @@ export default function VotingModal({
                     onClick={() => handleVote(player.id)}
                     disabled={hasVoted || me.id !== vote.currentlyVoting}
                   >
-                    {selectedVote === player.id ? 'VOTED' : 'VOTE'}
+                    {selectedVote === player.id ? 'Selected' : 'VOTE'}
                   </button>
                 )}
               </div>

@@ -36,20 +36,25 @@ type DeadBody struct {
 }
 
 func (ps *Players) GetSyndicateAmount() int {
-	ps.Lock()
-	defer ps.Unlock()
 	syndicateLeft := 0
 	for _, p := range ps.Players {
-		if p.Syndicate {
+		if p.Syndicate && p.Alive {
 			syndicateLeft++
 		}
 	}
 	return syndicateLeft
 
 }
+func (ps *Players) GetAlivePlayersAmount() int {
+	playersAlive := 0
+	for _, p := range ps.Players {
+		if p.Alive {
+			playersAlive++
+		}
+	}
+	return playersAlive
+}
 func (ps *Players) AssignSyndicate(playersAlive int) (ok bool) {
-	ps.Lock()
-	defer ps.Unlock()
 	syndicateAmount := 0
 	if playersAlive < 7 {
 		syndicateAmount = 1
