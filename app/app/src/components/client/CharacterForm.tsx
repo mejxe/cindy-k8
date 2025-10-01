@@ -55,15 +55,7 @@ export default function CharacterForm({ setToken, gameSummary }:
         </fieldset>
         <fieldset>
           <legend id="selectLabel">Occupation</legend>
-          <select id="mySelect" name="occupation">
-            <option value="cleaner">Cleaner</option>
-            <option value="shopkeeper">Shopkeeper</option>
-            <option value="carpenter">Carpenter</option>
-            <option value="goverment">Goverment official</option>
-            <option value="nurse">Nurse</option>
-            <option value="soldier">Soldier</option>
-
-          </select>
+          <input type="text" name='occupation'></input>
         </fieldset>
       </div>
       <button>Join the game</button>

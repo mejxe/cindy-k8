@@ -269,6 +269,11 @@
 @media (max-width: 480px) {
   #cform .options {
     border-width: 2px;
-    padding: 1rem 1rem 2rem;
+  }
+
+  #cform legend {
+    position: relative;
+    top: 20px;
+    left: -80px;
   }
 }

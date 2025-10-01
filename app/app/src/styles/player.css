@@ -74,12 +74,12 @@ ul#players {
   gap: 0.5rem;
   text-align: center;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .player h3 {
   color: rgba(255, 255, 255, 0.9);
-  line-height: 1rem;
+  line-height: 1.4rem;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   margin: 0;
   text-align: center;
@@ -360,6 +360,13 @@ ul#players {
   ul#players {
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
     gap: 2rem 1rem;
+  }
+
+  .player .citizenName h3 {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 0.5rem;
+    margin-bottom: 0.2rem;
+    margin-top: 0.2rem;
   }
 
   .player.me::before {
