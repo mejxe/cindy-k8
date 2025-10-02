@@ -1,5 +1,5 @@
 import { ClientMessageTypes, type ParsedWSMessage } from "../types/messageTypes"
-import { defaultState, defaultSummary, defaultVote, States, type GameSummary, type Player } from "../types/types"
+import { defaultState, defaultSummary, defaultVote, States, type Player } from "../types/types"
 import { parseWSMessages, sendGSRequest, sendRequest, updateGameState } from "./shared"
 import toast from "react-hot-toast"
 import type { Setup } from "../hooks/useSetup"
@@ -11,7 +11,6 @@ export function handleWSMessages(message: ParsedWSMessage, setup: Setup, gameInf
   console.log("message in wsmessages: ", message)
   console.log("Players in handlewsmsgs", gameInfoHandle.gameInfo.gameState.players)
   if (websocket === null) {
-    console.log("null socket wtf?")
     return
   }
   const clear = () => {
@@ -51,6 +50,7 @@ export function handleWSMessages(message: ParsedWSMessage, setup: Setup, gameInf
     }
     case "started": {
       setup.timer.callIn5Seconds(() => {
+        if (websocket === null) return
         sendGSRequest(websocket)
         sendRequest(websocket, ClientMessageTypes.GetMe, null)
       })
@@ -140,15 +140,6 @@ export function handleWSMessages(message: ParsedWSMessage, setup: Setup, gameInf
       let syndicates: Player[] = []
       console.log(message.body)
       gameInfoHandle.setters.setGameState(prevState => {
-        console.log("the state in setter ", prevState.players)
-        //message.body
-        //  .syndicates
-        //  .forEach(val => {
-        //    const player = (prevState.players.find(p => p.id === val))
-        //    if (player !== undefined) {
-        //      syndicatePlayers.push(player)
-        //    }
-        //  })
         syndicates = message.body.syndicates.map(id => prevState.players.find(p => p.id === id)).filter(p => p !== undefined)
         setup.setters.setGameSummaryData({ syndicates, syndicateWins: message.body.syndicateWins })
         setup.gameSummary.setGameSummaryOn(true)
@@ -224,8 +215,8 @@ export function handleWSMessages(message: ParsedWSMessage, setup: Setup, gameInf
       gameInfoHandle.setters.setVote(() => ({
         ...defaultVote,
       }))
-      break
       sendGSRequest(websocket)
+      break
     }
   }
 }
@@ -251,7 +242,6 @@ export function connectWS(
 export function AttachClientMessageHandler(
   setup: Setup,
   gameInfoHandle: GameInfoHandle
-  //TODO: Stale reference to gameinfo here
 ) {
   if (setup.data.websocket.current == null) return
   setup.data.websocket.current.onmessage = (event) => {

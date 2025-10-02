@@ -1,14 +1,20 @@
 import type { ParsedWSMessage } from "../types/messageTypes"
 import { parseWSMessages, sendRequest } from "./shared.ts"
 import { updateGameState } from "./shared"
-import { defaultState, defaultVote, type GameState } from "../types/types.ts"
+import { defaultState, defaultVote, type GameState, type Vote } from "../types/types.ts"
+import type { Dispatch, SetStateAction } from "react";
 
 
-export function connectWSForGM(password: string, setVerified, setWS, setGameState, gameState, setVote) {
+export function connectWSForGM(password: string,
+  setVerified: Dispatch<boolean>,
+  setWS: Dispatch<WebSocket | null>,
+  setGameState: Dispatch<GameState>,
+  gameState: GameState,
+  setVote: Dispatch<SetStateAction<Vote>>) {
   const host = window.location.hostname === 'localhost'
     ? 'localhost'
     : window.location.hostname;
-  const ws = new WebSocket(`ws://${host}:8080/gm?password=${password}`)
+  const ws = new WebSocket(`ws://${host}:8080/gmWS?password=${password}`)
   ws.onopen = () => {
     console.log("Ws connected.")
     setWS(ws)
@@ -32,7 +38,11 @@ export function connectWSForGM(password: string, setVerified, setWS, setGameStat
     setVerified(false)
   }
 }
-function handleGMMessages(ws: WebSocket, message: ParsedWSMessage, setGameState, gameState: GameState, setVote) {
+function handleGMMessages(ws: WebSocket,
+  message: ParsedWSMessage,
+  setGameState: Dispatch<GameState>,
+  gameState: GameState,
+  setVote: Dispatch<SetStateAction<Vote>>) {
   switch (message.type) {
     case "gameState": {
       const receivedGameState = message.body

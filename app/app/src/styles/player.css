@@ -415,17 +415,6 @@ ul#players {
   }
 }
 
-@keyframes blink {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.3;
-  }
-}
 
 @keyframes pulse-gold {
 
@@ -438,27 +427,5 @@ ul#players {
   50% {
     transform: scale(1.2);
     opacity: 0.8;
-  }
-}
-
-@keyframes flicker {
-  0% {
-    opacity: 0.6;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes dim-glow {
-
-  0%,
-  100% {
-    filter: brightness(1);
-  }
-
-  50% {
-    filter: brightness(0.8);
   }
 }

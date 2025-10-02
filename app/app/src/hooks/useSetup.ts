@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react"
-import { defaultSummary, States, type GameSummary, type GameSummaryData, type GameSummaryHandle, type Player, type StateKeys, type Summary } from "../types/types"
+import { useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react"
+import { defaultSummary, States, type GameSummary, type GameSummaryData, type StateKeys, type Summary } from "../types/types"
 import type { CountdownTimer } from "./useTimer"
 import useTimer from "./useTimer"
 

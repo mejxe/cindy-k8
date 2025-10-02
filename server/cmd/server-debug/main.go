@@ -2,9 +2,7 @@ package main
 
 import (
 	"bufio"
-	"embed"
 	"fmt"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -16,16 +14,10 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-//go:embed dist
-var reactDirRaw embed.FS
+var reactDir = os.DirFS("../app/app/dist/")
 
 func main() {
 	port := ":8080"
-	reactDir, err := fs.Sub(reactDirRaw, "dist/")
-
-	if err != nil {
-		log.Fatal("FS Error.")
-	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	println("Create GM password for this session")

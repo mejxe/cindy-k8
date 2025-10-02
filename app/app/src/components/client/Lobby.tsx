@@ -11,7 +11,9 @@ export default function Lobby({ time }: { time: number }) {
     {time > 0 && <h2>Game will start in {time}!</h2>}
     <ul id="players">
       {state.gameState.players.map((p) => {
-        return ClientPlayer(p, state.me, null)
+        if (state.me !== null) {
+          return ClientPlayer(p, state.me)
+        }
       })}
     </ul>
   </div>)

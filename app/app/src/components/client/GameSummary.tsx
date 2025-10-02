@@ -18,7 +18,9 @@ export default function GameSummary({ gameSummaryHandle }:
       <h2>Syndicate members</h2>
       <ul className="syndicateMembers">
         {gameSummaryHandle.syndicates.map(p => {
-          return ClientPlayer(p, state.me, null)
+          if (state.me !== null) {
+            return ClientPlayer(p, state.me)
+          }
         })}
       </ul>
       <button onClick={() => {

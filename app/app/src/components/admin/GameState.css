@@ -106,6 +106,11 @@
         0 0 8px rgba(212, 175, 55, 0.3);
 }
 
+.next-step {
+    border: 2px solid black;
+    animation: pulse-gold 1.5s ease-in-out infinite;
+}
+
 .control-btn {
     padding: 0.8rem 1.5rem;
     font-size: clamp(0.9rem, 2vw, 1.1rem);
@@ -265,4 +270,18 @@ button:disabled:hover {
     opacity: 0.3;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+@keyframes pulse-gold {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
 }

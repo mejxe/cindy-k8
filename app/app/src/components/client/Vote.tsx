@@ -63,7 +63,7 @@ export default function VotingModal({
     const matchingVotes = [...vote.votes.entries()].filter(value => value[1] == mostVotes)
     console.log(matchingVotes)
     if (matchingVotes.length > 1) return null
-    return players.find(p => p.id === matchingVotes[0][0])
+    return players.find(p => p.id === matchingVotes[0][0]) || null
   }
   return (
     <div className="voting-modal-overlay">
@@ -86,7 +86,7 @@ export default function VotingModal({
           <div className="players-voting-grid">
             {players.map((player) => (
               <div key={player.id} className={getVotingClasses(player)}>
-                {ClientPlayer(player, me, null)}
+                {ClientPlayer(player, me)}
 
                 {getVoteCount(player) > 0 && (
                   <div className="vote-count">

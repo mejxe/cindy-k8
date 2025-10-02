@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import './App.css'
-import { defaultState, defaultVote, States } from './types/types'
+import { States } from './types/types'
 import { connectWS } from './services/ClientWS.ts'
 import { AppContext } from './store/gamestate-context'
 import CharacterForm from './components/client/CharacterForm'

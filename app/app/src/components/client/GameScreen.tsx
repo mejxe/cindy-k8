@@ -1,5 +1,5 @@
-import { useContext, useState } from "react";
-import { defaultSummary, type Player, type Summary } from "../../types/types";
+import { useContext } from "react";
+import { type Player, type Summary } from "../../types/types";
 import "./css/GameScreen.css"
 import { AppContext } from "../../store/gamestate-context";
 import ClientPlayer from "./ClientPlayer";
@@ -74,7 +74,9 @@ export default function GameScreen({ summary, timer }: { summary: Summary, timer
               }
             </div>)
           } else {
-            return ClientPlayer(player, state.me, null)
+            if (state.me !== null) {
+              return ClientPlayer(player, state.me)
+            }
           }
         })}
       </ul>

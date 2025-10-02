@@ -37,7 +37,7 @@ export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: We
             {started}
           </p>
         </h4>
-        <button onClick={() => { sendRequest(ws, GMMessageTypes.Start, null) }} className={`control-btn ${!gamestate.started ? 'primary' : ''}`}>
+        <button onClick={() => { sendRequest(ws, GMMessageTypes.Start, null) }} className={`control-btn ${controls.startControl.startButton.className}`}>
           {controls.startControl.startButton.text}
         </button>
       </div>
@@ -96,12 +96,14 @@ export default function GameState({ gameInfo, ws }: { gameInfo: GameInfo, ws: We
 }
 
 function getControlState(state: GameState, vote: Vote) {
+  const startHiglight = !state.started ? " next-step" : ""
+  const voteHighlight = state.started && !state.night && !vote.voteOn ? " next-step" : ""
   return {
     startControl: {
       disabled: false,
       startButton: {
         text: state.started ? "Pause Game" : "Start Game",
-        className: "control-group"
+        className: "control-group" + startHiglight
       }
     },
     roundControl: {
@@ -115,7 +117,7 @@ function getControlState(state: GameState, vote: Vote) {
       text: vote.voteOn ? "Vote is ON" : "Vote is OFF",
       cycleVoteButton: {
         text: vote.voteOn ? "Stop vote" : "Start vote",
-        className: "control-btn vote-btn"
+        className: "control-btn vote-btn" + voteHighlight
       },
       summarizeVoteButton: {
         text: "Summarize Vote Early",

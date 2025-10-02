@@ -3,7 +3,6 @@ import type { Summary } from "../../types/types"
 import ClientPlayer from "./ClientPlayer"
 import { AppContext } from "../../store/gamestate-context"
 import "./css/RoundSummary.css"
-// TODO: ADD CSS
 
 export default function RoundSummary({ summary, time }: { summary: Summary, time: number }) {
   const state = useContext(AppContext)
@@ -16,6 +15,8 @@ export default function RoundSummary({ summary, time }: { summary: Summary, time
 
   }
   const render = () => {
+    if (state.me === null) return
+
     if (player === null) {
       return (
         <div className="roundSummary">
@@ -45,7 +46,7 @@ export default function RoundSummary({ summary, time }: { summary: Summary, time
           <h1>{getTimeOfDayText(night)} ended.</h1>
           <div className="playerKilled">
             <h2>{playerLeftMessage}</h2>
-            {ClientPlayer(player, state.me, null)}
+            {ClientPlayer(player, state.me)}
           </div>
           <h3>{getTimeOfDayText(!night)} will start in {time} seconds.</h3>
         </div>

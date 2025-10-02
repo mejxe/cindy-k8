@@ -187,10 +187,12 @@ func ShiftTime() {
 	}
 
 	if models.GlobalRoom.GameState.Night {
+		logging.Error.Println("Its night and im starting next round")
 		models.GlobalRoom.GameState.NextRound()
 		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNextRound, nil)
 	} else {
 		models.GlobalRoom.GameState.NextTime()
+		logging.Error.Println("Its day and im starting night")
 		models.GlobalRoom.OutChannel <- models.NewServerMessage(models.ServerMessageNightStarted, nil)
 	}
 	SendStateToEveryone()
