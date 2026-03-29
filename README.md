@@ -23,8 +23,8 @@ to be on the same network.
 - Have fun.
 ## Technicalities
 - Built with Golang + React.
-- Supports only one game at a time per host (as it's party game, duh).
+- Supports only one game at a time per host (as it's a party game, duh).
 - Self hosted on your local network.
 - Backend serves the React SPA.
 - Uses websockets for front to back communication.
-It's more of a simple passion/practice project than anything far fetched, but it's functional.
+It's more of a simple passion/practice project than anything farfetched, but it's functional.
